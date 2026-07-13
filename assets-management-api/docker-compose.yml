@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # Container 1: Web Server Nginx (Environment Linux)
+  nginx:
+    image: nginx:alpine
+    container_name: asset-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www/asset-management-api
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - asset-network
+    depends_on:
+      - app
+
+  # Container 2: PHP Application Server (Environment Linux Ubuntu/Debian)
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: asset-app
+    volumes:
+      - ./:/var/www/asset-management-api
+    networks:
+      - asset-network
+    depends_on:
+      - db
+
+  # Container 3: Database Server PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: asset-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: asset_management_prod
+      POSTGRES_USER: asset_admin
+      POSTGRES_PASSWORD: SandiKuat_Production_2026!
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - asset-network
+
+networks:
+  asset-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

@@ -1,0 +1,352 @@
+Tugas 1: [BACKEND] Inisialisasi Proyek Laravel API
+
+Deskripsi Singkat:
+Membuat proyek backend khusus API menggunakan Laravel dan memastikan server dapat berjalan dengan baik.
+
+Target Hasil:
+
+Folder backend terpisah berhasil dibuat.
+Laravel dapat dijalankan melalui terminal.
+Endpoint bawaan /api/user belum perlu digunakan.
+
+Langkah Kerja:
+
+Buat folder proyek backend, misalnya: asset-management-api
+Instal Laravel versi terbaru.
+Salin file .env dari .env.example.
+Generate application key.
+Jalankan server development.
+
+Petunjuk Arsitektur:
+
+Backend ini hanya berfungsi sebagai penyedia data melalui RESTful API.
+Semua endpoint nantinya akan dibuat di routes/api.php.
+Folder utama yang akan sering digunakan:
+app/Http/Controllers/
+app/Models/
+app/Http/Resources/
+database/migrations/
+
+
+Tugas 2: [FRONTEND] Inisialisasi Proyek React + TypeScript
+
+Deskripsi Singkat:
+Membuat proyek frontend terpisah menggunakan React dan TypeScript sebagai Single Page Application (SPA).
+
+Target Hasil:
+
+Folder frontend terpisah berhasil dibuat.
+Aplikasi React dapat dijalankan.
+Halaman bawaan React tampil di browser.
+
+Langkah Kerja:
+
+Buat folder proyek frontend, misalnya: asset-management-web
+Gunakan Vite dengan template React + TypeScript.
+Jalankan server development.
+
+Petunjuk Arsitektur:
+
+Frontend tidak boleh mengakses database secara langsung.
+Seluruh komunikasi data harus melalui API Laravel.
+Struktur folder awal yang akan digunakan:
+src/
+├── api/
+├── components/
+├── pages/
+├── routes/
+├── services/
+├── types/
+└── layouts/
+
+
+Tugas 3: [BACKEND] Konfigurasi Database dan Koneksi API
+
+Deskripsi Singkat:
+Menghubungkan Laravel dengan database yang akan digunakan dan memastikan koneksi berhasil.
+
+Target Hasil:
+
+Database untuk Asset Management System berhasil dibuat.
+File .env backend terkonfigurasi.
+Migrasi bawaan Laravel berhasil dijalankan tanpa error.
+
+Langkah Kerja:
+
+Buat database baru, misalnya asset_management.
+Atur konfigurasi database pada file .env:
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=asset_management
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+Jalankan migrasi:
+php artisan migrate
+Pastikan tabel bawaan Laravel berhasil dibuat.
+
+Petunjuk Arsitektur:
+
+Gunakan PostgreSQL sebagai database utama.
+Jangan membuat tabel baru untuk fitur aplikasi terlebih dahulu.
+Seluruh perubahan skema database ke depan harus menggunakan migration.
+
+Tugas 4: [FRONTEND] Menyiapkan Struktur Folder dan Routing Dasar
+
+Deskripsi Singkat:
+Mempersiapkan fondasi SPA dengan sistem routing.
+
+Target Hasil:
+
+Struktur folder awal selesai dibuat.
+React Router berhasil terpasang.
+Terdapat dua halaman dasar: Login dan Dashboard.
+
+Langkah Kerja:
+
+Instal React Router.
+npm install react-router-dom
+Buat struktur folder berikut:
+src/
+├── api/
+├── components/
+├── layouts/
+├── pages/
+│   ├── Dashboard/
+│   └── Login/
+├── routes/
+├── services/
+└── types/
+Buat dua halaman sederhana:
+LoginPage.tsx
+DashboardPage.tsx
+Konfigurasikan routing:
+/login
+/dashboard
+Jadikan /login sebagai halaman awal.
+
+Petunjuk Arsitektur:
+
+Semua konfigurasi routing disimpan di folder routes/.
+Jangan menambahkan logika autentikasi terlebih dahulu.
+Halaman Dashboard untuk sementara dapat menampilkan teks sederhana.
+
+
+Tugas 5: [BACKEND] Konfigurasi CORS untuk Frontend React
+
+Deskripsi Singkat:
+Mengizinkan aplikasi React mengakses API Laravel yang berjalan di domain atau port berbeda.
+
+Target Hasil:
+
+Frontend dapat mengirim request ke backend tanpa error CORS.
+Konfigurasi origin frontend tersimpan di file environment.
+
+Langkah Kerja:
+
+Catat URL frontend, misalnya:
+http://localhost:5173
+Tambahkan variabel baru pada file .env backend:
+FRONTEND_URL=http://localhost:5173
+Buka file config/cors.php dan sesuaikan nilai allowed_origins menggunakan variabel environment.
+Pastikan path berikut diizinkan:
+api/*
+sanctum/csrf-cookie
+Bersihkan cache konfigurasi:
+php artisan config:clear
+
+Petunjuk Arsitektur:
+
+Hindari penggunaan wildcard (*) pada allowed_origins.
+Seluruh komunikasi frontend dan backend akan menggunakan JSON.
+
+Tugas 6: [FRONTEND] Membuat Axios Instance Terpusat
+
+Deskripsi Singkat:
+Menyiapkan satu titik akses untuk seluruh komunikasi API.
+
+Target Hasil:
+
+Axios berhasil terpasang.
+Tersedia instance API yang dapat digunakan ulang di seluruh aplikasi.
+
+Langkah Kerja:
+
+Instal Axios.
+npm install axios
+Buat file:
+src/api/axios.ts
+Tambahkan environment variable pada file .env frontend:
+VITE_API_URL=http://127.0.0.1:8000/api
+Konfigurasikan Axios instance dengan:
+baseURL dari VITE_API_URL
+Header Accept: application/json
+Header Content-Type: application/json
+Uji koneksi dengan melakukan request sederhana ke endpoint backend berikut:
+GET /api/health
+
+Endpoint tersebut belum tersedia. Untuk pengujian, buat endpoint sementara pada routes/api.php yang mengembalikan respons JSON sederhana.
+
+Contoh respons yang diharapkan:
+
+{
+  "status": "ok"
+}
+
+Petunjuk Arsitektur:
+
+Semua request API ke depan wajib menggunakan src/api/axios.ts.
+Jangan memanggil fetch() secara langsung dari komponen React.
+
+
+Tugas 7: [BACKEND] Setup Autentikasi API dengan Laravel Sanctum
+
+Deskripsi Singkat:
+Menyiapkan sistem autentikasi berbasis token untuk komunikasi antara React SPA dan Laravel API.
+
+Target Hasil:
+
+Laravel Sanctum terpasang dan terkonfigurasi.
+Tabel penyimpanan token berhasil dibuat.
+API siap mengeluarkan token akses.
+
+Langkah Kerja:
+
+Instal Sanctum.
+composer require laravel/sanctum
+Publish file konfigurasi dan migration.
+php artisan sanctum:install
+Jalankan migrasi.
+php artisan migrate
+Tambahkan trait HasApiTokens pada model User.
+Pastikan middleware API menggunakan autentikasi Sanctum.
+
+Petunjuk Arsitektur:
+
+Gunakan Personal Access Token, bukan session authentication.
+Seluruh endpoint yang memerlukan login nantinya akan dilindungi middleware auth:sanctum.
+Format header autentikasi dari frontend:
+Authorization: Bearer <token>
+
+
+Tugas 8: [FRONTEND] Menyiapkan Manajemen Token dan Struktur Layanan Autentikasi
+
+Deskripsi Singkat:
+Membuat fondasi autentikasi di frontend tanpa membangun form login terlebih dahulu.
+
+Target Hasil:
+
+Tersedia service khusus autentikasi.
+Axios dapat mengirim token secara otomatis jika token tersedia.
+
+Langkah Kerja:
+
+Buat struktur file berikut:
+src/
+├── services/
+│   └── auth.service.ts
+├── types/
+│   └── auth.ts
+└── utils/
+    └── token.ts
+Pada utils/token.ts, buat fungsi untuk:
+Menyimpan token
+Mengambil token
+Menghapus token
+Tambahkan Axios request interceptor pada src/api/axios.ts.
+
+Logika interceptor:
+
+Ambil token dari utils/token.ts
+Jika token tersedia, tambahkan header:
+Authorization: Bearer <token>
+Siapkan auth.service.ts sebagai tempat untuk fungsi berikut (boleh dikosongkan terlebih dahulu):
+login()
+logout()
+getProfile()
+Buat type dasar pada types/auth.ts untuk respons autentikasi.
+
+Petunjuk Arsitektur:
+
+Simpan seluruh logika autentikasi di folder services/.
+Komponen React tidak boleh berinteraksi langsung dengan localStorage.
+Seluruh request harus tetap menggunakan Axios instance terpusat.
+
+Tugas 9: [BACKEND] Membuat Endpoint Login dan Profil Pengguna
+
+Deskripsi Singkat:
+Membuat endpoint autentikasi pertama yang dapat menghasilkan token dan mengembalikan data pengguna yang sedang login.
+
+Target Hasil:
+
+Endpoint POST /api/login berfungsi.
+Endpoint GET /api/me terlindungi dengan auth:sanctum.
+Login menghasilkan personal access token.
+
+Langkah Kerja:
+
+Buat AuthController.
+Tambahkan method:
+login()
+me()
+Logika login():
+Validasi email dan password.
+Verifikasi kredensial menggunakan mekanisme autentikasi Laravel.
+Hapus token lama pengguna (opsional, tetapi disarankan untuk satu sesi aktif).
+Buat token baru menggunakan Sanctum.
+Kembalikan respons JSON berisi:
+{
+  "token": "...",
+  "user": {}
+}
+Logika me():
+Mengembalikan data pengguna yang sedang terautentikasi.
+Tambahkan route di routes/api.php:
+POST /login
+GET /me
+Lindungi endpoint /me dengan middleware:
+auth:sanctum
+Buat minimal satu akun pengguna untuk pengujian menggunakan seeder atau database.
+
+Petunjuk Arsitektur:
+
+Tempatkan validasi di Form Request jika diperlukan.
+Gunakan JsonResponse yang konsisten.
+Hindari mengembalikan field sensitif seperti password.
+
+Tugas 10: [FRONTEND] Implementasi Login Service dan Uji Autentikasi
+
+Deskripsi Singkat:
+Menghubungkan halaman login dengan API Laravel dan menyimpan token hasil autentikasi.
+
+Target Hasil:
+
+Pengguna dapat login melalui halaman React.
+Token tersimpan menggunakan utility token.
+Data pengguna dapat diambil melalui endpoint /api/me.
+
+Langkah Kerja:
+
+Lengkapi fungsi berikut pada auth.service.ts:
+login(email, password)
+getProfile()
+logout()
+Hubungkan LoginPage.tsx dengan auth.service.ts.
+Buat form sederhana dengan field:
+Email
+Password
+Saat login berhasil:
+Simpan token.
+Panggil getProfile().
+Arahkan pengguna ke /dashboard.
+Pada DashboardPage.tsx, tampilkan nama pengguna yang diperoleh dari endpoint /api/me.
+Tangani kondisi berikut:
+Kredensial salah.
+Token tidak valid.
+Respons API gagal.
+
+Petunjuk Arsitektur:
+
+Jangan menyimpan objek pengguna langsung di localStorage.
+Fokus pada alur autentikasi dasar terlebih dahulu.
+Manajemen state global akan ditambahkan pada tahap berikutnya.
