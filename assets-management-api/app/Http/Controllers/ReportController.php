@@ -49,13 +49,25 @@ class ReportController extends Controller
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
+            // Sanitasi untuk mencegah CSV Formula Injection (CWE-1236)
+            $sanitize = function ($value) {
+                if ($value === null || $value === '') {
+                    return '-';
+                }
+                $str = (string) $value;
+                if (in_array($str[0], ['=', '+', '-', '@', "\t", "\r"], true)) {
+                    return "'" . $str;
+                }
+                return $str;
+            };
+
             foreach ($assets as $asset) {
                 fputcsv($file, [
-                    $asset->asset_code,
-                    $asset->name,
-                    $asset->category->name ?? '-',
-                    $asset->location->name ?? '-',
-                    $asset->status,
+                    $sanitize($asset->asset_code),
+                    $sanitize($asset->name),
+                    $sanitize($asset->category->name ?? '-'),
+                    $sanitize($asset->location->name ?? '-'),
+                    $sanitize($asset->status),
                     $asset->purchase_price,
                     $asset->current_book_value
                 ]);

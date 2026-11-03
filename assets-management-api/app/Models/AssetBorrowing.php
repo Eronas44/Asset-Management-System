@@ -38,12 +38,13 @@ class AssetBorrowing extends Model
                 $q->where('borrower_name', 'like', '%' . $search . '%')
                   ->orWhereHas('asset', function ($assetQuery) use ($search) {
                       $assetQuery->where('name', 'like', '%' . $search . '%')
-                                 ->orWhere('asset_code', 'like', '%' . $search . '%');
+                                 ->orWhere('asset_code', 'like', '%' . $search . '%')
+                                 ->orWhere('uuid', 'like', '%' . $search . '%');
                   });
             });
         });
     
-        $query->when(isset($filters['is_returned']), function ($query) use ($filters) {
+        $query->when(isset($filters['is_returned']) && $filters['is_returned'] !== '', function ($query) use ($filters) {
             // Mengonversi string parameter 'true'/'false' menjadi boolean filter
             $isReturned = filter_var($filters['is_returned'], FILTER_VALIDATE_BOOLEAN);
             if ($isReturned) {

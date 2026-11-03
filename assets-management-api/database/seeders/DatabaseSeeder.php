@@ -34,15 +34,32 @@ class DatabaseSeeder extends Seeder
             Permission::findOrCreate($permission);
         }
 
+        $roleSuperuser = Role::findOrCreate('superuser');
+        $roleSuperuser->syncPermissions(Permission::all());
+
         $roleAdmin = Role::findOrCreate('admin');
-        $roleAdmin->syncPermissions(Permission::all());
+        $roleAdmin->syncPermissions([
+            'manage-master-data',
+            'manage-assets',
+            'manage-borrowings',
+            'view-reports',
+        ]);
 
         $roleStaff = Role::findOrCreate('staff');
-        $roleStaff->syncPermissions(['manage-borrowings', 'view-reports']);
+        $roleStaff->syncPermissions([
+            'manage-borrowings',
+            'manage-assets',
+        ]);
 
         // ==========================================
         // 2. PEMBUATAN AKUN PENGGUNA INTI
         // ==========================================
+        $superuser = User::updateOrCreate(
+            ['email' => 'superuser@asset.com'],
+            ['name' => 'Super Administrator', 'password' => Hash::make('password123')]
+        );
+        $superuser->syncRoles([$roleSuperuser]);
+
         $admin = User::updateOrCreate(
             ['email' => 'admin@asset.com'],
             ['name' => 'Admin Utama', 'password' => Hash::make('password123')]
@@ -132,24 +149,27 @@ class DatabaseSeeder extends Seeder
         $seedAsset = function (array $template, string $type, string $status, int $sequence) use (&$counter, $catModels, $locModels) {
             $monthsAgo = $counter * 2;
             $purchaseDate = Carbon::now()->subMonths($monthsAgo)->format('Y-m-d');
+            $assetCode = $template['code_prefix'] . '-' . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT);
 
-            $asset = Asset::create([
-                'uuid' => (string) Str::uuid(),
-                'asset_code' => $template['code_prefix'] . '-' . str_pad((string) $sequence, 3, '0', STR_PAD_LEFT),
-                'name' => $template['name'] . ' #' . $sequence,
-                'type' => $type,
-                'quantity' => $type === 'bulk' ? $template['quantity'] : 1,
-                'asset_category_id' => $catModels[$template['cat']]->id,
-                'asset_location_id' => $locModels[$template['loc']]->id,
-                'purchase_date' => $purchaseDate,
-                'purchase_price' => $template['price'],
-                'useful_life_years' => $template['life'],
-                'residual_value' => $template['residu'],
-                'status' => $status,
-                'notes' => $type === 'bulk'
-                    ? 'Stok bulk untuk operasional harian.'
-                    : 'Aset tunggal untuk inventaris utama.',
-            ]);
+            $asset = Asset::firstOrCreate(
+                ['asset_code' => $assetCode],
+                [
+                    'uuid' => (string) Str::uuid(),
+                    'name' => $template['name'] . ' #' . $sequence,
+                    'type' => $type,
+                    'quantity' => $type === 'bulk' ? $template['quantity'] : 1,
+                    'asset_category_id' => $catModels[$template['cat']]->id,
+                    'asset_location_id' => $locModels[$template['loc']]->id,
+                    'purchase_date' => $purchaseDate,
+                    'purchase_price' => $template['price'],
+                    'useful_life_years' => $template['life'],
+                    'residual_value' => $template['residu'],
+                    'status' => $status,
+                    'notes' => $type === 'bulk'
+                        ? 'Stok bulk untuk operasional harian.'
+                        : 'Aset tunggal untuk inventaris utama.',
+                ]
+            );
 
             $counter++;
 
@@ -157,7 +177,7 @@ class DatabaseSeeder extends Seeder
         };
 
         $seedBorrowingHistory = function (Asset $asset, string $status, int $sequence, bool $canBorrow = true) use ($borrowers) {
-            if (!$canBorrow) {
+            if (!$canBorrow || $asset->borrowings()->exists()) {
                 return;
             }
 

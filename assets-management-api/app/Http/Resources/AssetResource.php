@@ -9,8 +9,9 @@ class AssetResource extends JsonResource
 {
     public function toArray(Request $request): array
 {
-    // Mengambil base URL aplikasi backend (misal: http://127.0.0.1:8000)
-    $baseUrl = url('/api/public/assets/' . $this->uuid);
+    // Mengambil URL frontend untuk antarmuka publik aset
+    $frontendUrl = env('FRONTEND_URL', 'http://localhost:2000');
+    $publicUrl = rtrim($frontendUrl, '/') . '/public/assets/' . $this->uuid;
 
     return [
         'id' => $this->id,
@@ -20,9 +21,9 @@ class AssetResource extends JsonResource
         'type' => $this->type,
         'quantity' => $this->quantity,
         
-        // Menambahkan properti URL identitas digital sesuai instruksi kerja
-        'public_url' => $baseUrl,
-        'qr_code_url' => $baseUrl, // Sesuai petunjuk arsitektur, sementara cukup diisi string URL yang sama
+        // Menambahkan properti URL identitas digital menuju tampilan web publik
+        'public_url' => $publicUrl,
+        'qr_code_url' => $publicUrl,
         
         'purchase_date' => $this->purchase_date,
         'purchase_price' => (float) $this->purchase_price,

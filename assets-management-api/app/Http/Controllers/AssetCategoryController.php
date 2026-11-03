@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetCategory;
 use App\Http\Requests\StoreAssetCategoryRequest;
+use App\Http\Requests\UpdateAssetCategoryRequest;
 use App\Http\Resources\AssetCategoryResource;
 use Illuminate\Http\JsonResponse;
 use App\Services\ActivityLogger;
@@ -67,6 +68,45 @@ class AssetCategoryController extends Controller
             'message' => 'Success',
             'data' => new AssetCategoryResource($category)
         ], 201);
+    }
 
+    /**
+     * Memperbarui kategori master aset.
+     */
+    public function update(UpdateAssetCategoryRequest $request, int $id): JsonResponse
+    {
+        $category = AssetCategory::findOrFail($id);
+
+        $category->update($request->validated());
+
+        ActivityLogger::log('update_category', "Memperbarui kategori aset: {$category->name}", $category);
+
+        return response()->json([
+            'message' => 'Kategori berhasil diperbarui',
+            'data' => new AssetCategoryResource($category)
+        ], 200);
+    }
+
+    /**
+     * Menghapus kategori master aset (Soft Delete).
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $category = AssetCategory::findOrFail($id);
+
+        if ($category->assets()->exists()) {
+            return response()->json([
+                'message' => 'Kategori tidak dapat dihapus karena masih digunakan oleh aset yang terdaftar.'
+            ], 422);
+        }
+
+        $categoryName = $category->name;
+        $category->delete();
+
+        ActivityLogger::log('delete_category', "Menghapus kategori aset: {$categoryName}", $category);
+
+        return response()->json([
+            'message' => 'Kategori berhasil dihapus'
+        ], 200);
     }
 }

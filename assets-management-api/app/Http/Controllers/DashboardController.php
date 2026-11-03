@@ -28,10 +28,10 @@ class DashboardController extends Controller
     $stats = Cache::remember('dashboard_stats', 300, function () {
         $assetStats = Asset::selectRaw("
             COUNT(*) as total,
-            COUNT(CASE WHEN status = '" . Asset::STATUS_AVAILABLE . "' THEN 1 END) as available,
+            COUNT(CASE WHEN status IN ('" . Asset::STATUS_AVAILABLE . "', '" . Asset::SINGLE_STATUS_AVAILABLE . "') AND (type != '" . Asset::TYPE_BULK . "' OR quantity > 0) THEN 1 END) as available,
             COUNT(CASE WHEN status = '" . Asset::STATUS_BORROWED . "' THEN 1 END) as borrowed,
-            COUNT(CASE WHEN status = '" . Asset::STATUS_MAINTENANCE . "' THEN 1 END) as maintenance,
-            COUNT(CASE WHEN status = '" . Asset::STATUS_RETIRED . "' THEN 1 END) as retired
+            COUNT(CASE WHEN status IN ('" . Asset::STATUS_MAINTENANCE . "', '" . Asset::SINGLE_STATUS_IN_REPAIR . "') THEN 1 END) as maintenance,
+            COUNT(CASE WHEN status IN ('" . Asset::STATUS_RETIRED . "', '" . Asset::SINGLE_STATUS_DISCARDED . "', '" . Asset::SINGLE_STATUS_DAMAGED . "', '" . Asset::BULK_STATUS_EMPTY . "', '" . Asset::BULK_STATUS_EXPIRED . "') THEN 1 END) as retired
         ")->first();
 
         $activeBorrowingsCount = AssetBorrowing::whereNull('returned_at')->count();

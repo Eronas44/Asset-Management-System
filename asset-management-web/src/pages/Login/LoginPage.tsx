@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useAuth } from '../../context/AuthContext';
-import { ArrowRight, Building2, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, LockKeyhole, Mail, ShieldCheck, Database, History } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { refreshProfile } = useAuth();
+  const { setAuthData, refreshProfile } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,17 +19,36 @@ const LoginPage: React.FC = () => {
     setLoading(true);
 
     try {
-      await authService.login({ email, password });
-      // Jika berhasil, arahkan ke dashboard
-      await refreshProfile(); 
-      navigate('/dashboard');
-    } catch (err: any) {
-      console.error(err);
-      // Tangani error respon dari Laravel API
-      if (err.response && err.response.data && err.response.data.message) {
-        setError(err.response.data.message);
+      const authData = await authService.login({ email, password });
+      
+      let perms = authData.permissions;
+      if (authData.roles && authData.permissions) {
+        setAuthData(authData);
       } else {
-        setError('Gagal terhubung ke server. Silakan coba lagi.');
+        const profileData = await refreshProfile();
+        perms = profileData?.permissions;
+      }
+      
+      if (perms?.includes('view-reports')) {
+        navigate('/dashboard');
+      } else if (perms?.includes('manage-borrowings')) {
+        navigate('/borrowings');
+      } else if (perms?.includes('manage-assets')) {
+        navigate('/assets');
+      } else if (perms?.includes('manage-master-data')) {
+        navigate('/categories');
+      } else if (perms?.includes('manage-users')) {
+        navigate('/users');
+      } else {
+        navigate('/forbidden');
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      const apiErr = err as { response?: { data?: { message?: string } } };
+      if (apiErr.response?.data?.message) {
+        setError(apiErr.response.data.message);
+      } else {
+        setError('Gagal terhubung ke gateway otentikasi. Periksa koneksi Anda.');
       }
     } finally {
       setLoading(false);
@@ -37,121 +56,153 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-hidden bg-slate-950 text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(79,70,229,0.35),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(16,185,129,0.18),_transparent_30%),linear-gradient(135deg,_#0f172a_0%,_#111827_45%,_#0b1220_100%)]" />
-      <div className="relative flex min-h-screen items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-        <div className="grid w-full max-w-6xl grid-cols-1 overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl lg:grid-cols-2">
-          <div className="relative hidden flex-col justify-between gap-10 p-10 lg:flex">
-            <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(99,102,241,0.16),_transparent_40%)]" />
-            <div className="relative z-10">
-              <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 shadow-sm">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-white">
-                  <Building2 size={16} />
-                </div>
-                <span className="font-medium tracking-wide">AssetSystem</span>
-              </div>
-
-              <h1 className="max-w-lg text-4xl font-bold tracking-tight text-white xl:text-5xl">
-                Kelola inventaris, peminjaman, dan keamanan data dalam satu panel.
-              </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-slate-300">
-                Akses dashboard untuk memantau aset, transaksi, aktivitas pengguna, serta backup & restore database dengan alur kerja yang terpusat.
-              </p>
+    <div className="flex min-h-screen bg-white antialiased dark:bg-slate-950">
+      {/* Left Column: Corporate Brand & Architectural Identity */}
+      <div className="relative hidden w-1/2 flex-col justify-between border-r border-slate-200 bg-slate-900 p-12 text-white dark:border-slate-800 lg:flex">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-white font-mono text-xs font-bold text-slate-900">
+              AM
             </div>
+            <span className="text-xs font-semibold tracking-wider uppercase text-slate-300">
+              Asset Management System
+            </span>
+          </div>
 
-            <div className="relative z-10 grid gap-4 text-sm text-slate-200 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="mb-2 inline-flex items-center gap-2 text-emerald-300">
-                  <ShieldCheck size={16} /> Hak akses terkontrol
-                </div>
-                <p className="text-slate-300">Login hanya untuk pengguna yang memiliki kredensial dan permission yang sesuai.</p>
+          <div className="mt-20 max-w-md space-y-4">
+            <h1 className="text-3xl font-bold tracking-tight text-white xl:text-4xl">
+              Tata Kelola Inventaris & Aset Fisik Terpadu
+            </h1>
+            <p className="text-xs leading-relaxed text-slate-400">
+              Platform enterprise untuk pengawasan siklus hidup aset, valuasi depresiasi finansial, sirkulasi peminjaman, serta integritas audit forensik.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-3 border-t border-slate-800 pt-6">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+                <ShieldCheck size={14} className="text-emerald-400" />
+                <span>RBAC Terkendali</span>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="mb-2 inline-flex items-center gap-2 text-indigo-300">
-                  <Sparkles size={16} /> Tampilan konsisten
-                </div>
-                <p className="text-slate-300">Masuk ke dashboard dengan antarmuka yang seragam dan lebih mudah dipindai.</p>
+              <p className="text-[11px] text-slate-500">Otoritas berlapis granular</p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+                <History size={14} className="text-slate-400" />
+                <span>Audit Forensik</span>
               </div>
+              <p className="text-[11px] text-slate-500">Pelacakan log real-time</p>
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-slate-300">
+                <Database size={14} className="text-slate-400" />
+                <span>Data Snapshot</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Pencadangan terpusat</p>
+            </div>
+          </div>
+          <div className="pt-4 text-[11px] text-slate-600">
+            &copy; {new Date().getFullYear()} Corporate Asset Registry. Hak cipta dilindungi.
+          </div>
+        </div>
+      </div>
+
+      {/* Right Column: Portal Authentication Form */}
+      <div className="flex w-full items-center justify-center bg-slate-50/50 p-6 dark:bg-slate-950 lg:w-1/2 lg:p-12">
+        <div className="w-full max-w-sm space-y-6">
+          {/* Mobile Monogram Header */}
+          <div className="lg:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 items-center justify-center rounded bg-slate-900 font-mono text-xs font-bold text-white dark:bg-slate-100 dark:text-slate-950">
+                AM
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-slate-900 dark:text-white">
+                Asset Management
+              </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-center p-6 sm:p-8 lg:p-10">
-            <form
-              onSubmit={handleLogin}
-              className="w-full max-w-md rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-6 shadow-xl sm:p-8"
-            >
-              <div className="mb-8">
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/15 text-indigo-300 ring-1 ring-inset ring-indigo-400/20">
-                  <LockKeyhole size={22} />
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Otentikasi Akun
+            </h2>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              Masukkan kredensial resmi Anda untuk mengakses panel kerja.
+            </p>
+          </div>
+
+          {error && (
+            <div className="rounded border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                Alamat Email
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <Mail size={14} />
                 </div>
-                <h3 className="text-2xl font-bold tracking-tight text-white">Masuk ke Sistem</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  Gunakan akun terdaftar untuk mengakses modul inventaris dan administrasi.
-                </p>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  placeholder="operator@perusahaan.com"
+                  className="w-full rounded border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-900 outline-none transition focus:border-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600 dark:focus:border-slate-200"
+                />
               </div>
+            </div>
 
-              {error && (
-                <div className="mb-5 rounded-2xl border border-red-400/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                  {error}
+            <div>
+              <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+                Kata Sandi
+              </label>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                  <LockKeyhole size={14} />
                 </div>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-200">Email</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                      <Mail size={16} />
-                    </div>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      autoComplete="email"
-                      placeholder="nama@perusahaan.com"
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-200">Password</label>
-                  <div className="relative">
-                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                      <LockKeyhole size={16} />
-                    </div>
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      autoComplete="current-password"
-                      placeholder="Masukkan password"
-                      className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-4 text-white outline-none transition-colors placeholder:text-slate-500 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-500 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {loading ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                      Memproses...
-                    </>
-                  ) : (
-                    <>
-                      Masuk
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
+                  className="w-full rounded border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-900 outline-none transition focus:border-slate-900 dark:border-slate-800 dark:bg-slate-900 dark:text-white dark:placeholder:text-slate-600 dark:focus:border-slate-200"
+                />
               </div>
-            </form>
+            </div>
+
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-slate-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
+              >
+                {loading ? (
+                  <>
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white dark:border-slate-950/40 dark:border-t-slate-950" />
+                    <span>Mengautentikasi...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Masuk ke Konsol</span>
+                    <ArrowRight size={13} />
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+
+          <div className="border-t border-slate-100 pt-4 text-center text-[11px] text-slate-400 dark:border-slate-800 dark:text-slate-500">
+            Akses dibatasi hanya untuk personil yang terotorisasi.
           </div>
         </div>
       </div>

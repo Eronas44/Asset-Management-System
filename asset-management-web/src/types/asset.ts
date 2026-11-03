@@ -33,6 +33,8 @@ export interface Asset {
   qr_code_url?: string;
   status: AssetStatus;
   notes: string | null;
+  asset_category_id?: number;
+  asset_location_id?: number;
   category?: AssetCategory;
   location?: AssetLocation;
   created_at: string;

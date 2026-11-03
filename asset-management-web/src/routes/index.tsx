@@ -18,6 +18,7 @@ const ForbiddenPage = lazy(() => import('../pages/Forbidden/ForbiddenPage'));
 const ActivityLogPage = lazy(() => import('../pages/ActivityLogs/ActivityLogPage'));
 const UserPage = lazy(() => import('../pages/Users/UserPage'));
 const BackupPage = lazy(() => import('../pages/Backups/BackupPage'));
+const GuidePage = lazy(() => import('../pages/Guide/GuidePage'));
 
 // Helper untuk membungkus komponen dengan state loading saat proses unduh halaman berlangsung
 const withSuspense = (component: React.ReactNode) => (
@@ -77,7 +78,7 @@ export const router = createBrowserRouter([
   {
     path: '/assets',
     element: (
-      <ProtectedRoute permission="manage-assets">
+      <ProtectedRoute permission="manage-assets|manage-borrowings">
         {withSuspense(<AssetPage />)}
       </ProtectedRoute>
     ),
@@ -85,7 +86,7 @@ export const router = createBrowserRouter([
   {
     path: '/assets/:id',
     element: (
-      <ProtectedRoute permission="manage-assets">
+      <ProtectedRoute permission="manage-assets|manage-borrowings">
         {withSuspense(<AssetDetailPage />)}
       </ProtectedRoute>
     ),
@@ -119,6 +120,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute permission="manage-users">
         {withSuspense(<BackupPage />)}
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/guide',
+    element: (
+      <ProtectedRoute layout="none">
+        {withSuspense(<GuidePage />)}
       </ProtectedRoute>
     ),
   },

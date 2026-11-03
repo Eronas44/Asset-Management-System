@@ -107,6 +107,24 @@ class UserController extends Controller
     public function updateRole(UpdateUserRoleRequest $request, int $id): JsonResponse
     {
         $user = User::findOrFail($id);
+
+        // 1. Proteksi Self-Lockout: Cegah user mengubah rolenya sendiri
+        if ($request->user() && $request->user()->id === $user->id) {
+            return response()->json([
+                'message' => 'Anda tidak dapat mengubah peran akun Anda sendiri demi mencegah penguncian akses.'
+            ], 400);
+        }
+
+        // 2. Proteksi Superuser Terakhir: Cegah penghapusan satu-satunya superuser di sistem
+        if ($user->hasRole('superuser') && $request->role !== 'superuser') {
+            $superuserCount = User::role('superuser')->count();
+            if ($superuserCount <= 1) {
+                return response()->json([
+                    'message' => 'Tidak dapat mengubah peran. Sistem harus memiliki minimal satu akun Superuser aktif.'
+                ], 400);
+            }
+        }
+
         $oldRoles = $user->getRoleNames()->implode(', ');
 
         DB::transaction(function () use ($request, $user) {

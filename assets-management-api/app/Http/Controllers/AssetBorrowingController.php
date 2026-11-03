@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Services\ActivityLogger;
+use Illuminate\Support\Facades\Cache;
 
 class AssetBorrowingController extends Controller
 {
@@ -31,7 +32,7 @@ class AssetBorrowingController extends Controller
         $filters = $request->only(['search', 'is_returned']);
         $perPage = $request->input('per_page', 10);
 
-        $borrowings = AssetBorrowing::with(['asset.category', 'asset.location'])
+        $borrowings = AssetBorrowing::with(['asset' => fn($q) => $q->withTrashed(), 'asset.category', 'asset.location'])
             ->filter($filters)
             ->latest()
             ->paginate($perPage);
@@ -64,41 +65,52 @@ class AssetBorrowingController extends Controller
 
     public function store(StoreAssetBorrowingRequest $request): JsonResponse
     {
-        // Ambil data aset yang dituju
-        $asset = Asset::find($request->asset_id);
+        // Jalankan Database Transaction dengan Pessimistic Locking untuk mencegah Race Condition (Double Borrowing)
+        $borrowing = DB::transaction(function () use ($request) {
+            $asset = Asset::where('id', $request->asset_id)->lockForUpdate()->first();
 
-        // Pastikan status aset saat ini adalah available
-        if ($asset->status !== Asset::STATUS_AVAILABLE) {
-            return response()->json([
-                'message' => 'Aset tidak tersedia untuk dipinjam saat ini.'
-            ], 422);
-        }
+            // Mendukung status kanonikal 'tersedia' maupun legacy 'available'
+            if (!$asset || !$asset->isAvailable()) {
+                abort(response()->json([
+                    'message' => 'Aset tidak tersedia untuk dipinjam saat ini.'
+                ], 422));
+            }
 
-        // Jalankan Database Transaction untuk keamanan data mutasi
-        $borrowing = DB::transaction(function () use ($request, $asset) {
             $borrowedByUserName = optional($request->user())->name ?? 'Unknown';
+            $borrowedAt = $request->filled('borrowed_at') ? Carbon::parse($request->input('borrowed_at')) : Carbon::now();
 
-            // 1. Buat records transaksi peminjaman
+            // 1. Buat records transaksi peminjaman dengan server-controlled timestamp
             $borrow = AssetBorrowing::create(array_merge($request->validated(), [
+                'borrowed_at' => $borrowedAt,
                 'borrowed_by_user_name' => $borrowedByUserName,
             ]));
 
-            // 2. Ubah status operasional aset menjadi 'borrowed'
-            $asset->update([
-                'status' => Asset::STATUS_BORROWED
-            ]);
+            // 2. Ubah status operasional aset
+            if ($asset->isBulk()) {
+                $newQty = max(0, $asset->quantity - 1);
+                $asset->update([
+                    'quantity' => $newQty,
+                    'status' => $newQty === 0 ? Asset::BULK_STATUS_EMPTY : $asset->status,
+                ]);
+            } else {
+                $asset->update([
+                    'status' => Asset::STATUS_BORROWED
+                ]);
+            }
 
             ActivityLogger::log('borrow_asset', "Memproses peminjaman aset {$asset->name} oleh {$borrow->borrower_name}", $borrow);
             return $borrow;
         });
 
+        // Hapus cache statistik agar dashboard langsung tersinkron
+        Cache::forget('dashboard_stats');
+
         $borrowing->load(['asset']);
 
         return response()->json([
-        'message' => 'Success',
-        'data' => new AssetBorrowingResource($borrowing)
-    ], 201);
-
+            'message' => 'Success',
+            'data' => new AssetBorrowingResource($borrowing)
+        ], 201);
     }
 
         /**
@@ -117,36 +129,57 @@ class AssetBorrowingController extends Controller
 
     public function markAsReturned(int $id): JsonResponse
     {
-        // 1. Cari data transaksi peminjaman berdasarkan ID beserta data aset terkait
-        $borrowing = AssetBorrowing::with('asset')->findOrFail($id);
+        // Jalankan Database Transaction dengan lockForUpdate untuk mencegah race condition
+        $borrowing = DB::transaction(function () use ($id) {
+            // 1. Lock transaksi peminjaman
+            $borrowing = AssetBorrowing::with(['asset' => fn($q) => $q->withTrashed()])
+                ->where('id', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        // 2. Validasi Idempotensi: Pastikan aset belum dikembalikan sebelumnya
-        if ($borrowing->returned_at !== null) {
-            return response()->json([
-                'message' => 'Aset ini sudah berstatus selesai dikembalikan sebelumnya.'
-            ], 422);
-        }
+            // 2. Validasi Idempotensi: Pastikan aset belum dikembalikan sebelumnya
+            if ($borrowing->returned_at !== null) {
+                abort(response()->json([
+                    'message' => 'Aset ini sudah berstatus selesai dikembalikan sebelumnya.'
+                ], 422));
+            }
 
-        // 3. Jalankan Database Transaction untuk keamanan mutasi dua arah
-        DB::transaction(function () use ($borrowing) {
-            // Update waktu pengembalian transaksi peminjaman ke waktu sekarang
+            // 3. Update waktu pengembalian transaksi peminjaman ke waktu server sekarang
             $borrowing->update([
                 'returned_at' => Carbon::now()
             ]);
 
-            // Kembalikan status operasional entitas aset menjadi 'available'
-            $borrowing->asset->update([
-                'status' => \App\Models\Asset::STATUS_AVAILABLE
-            ]);
+            // 4. Kembalikan status operasional entitas aset dengan lockForUpdate
+            if ($borrowing->asset_id) {
+                $asset = Asset::withTrashed()->where('id', $borrowing->asset_id)->lockForUpdate()->first();
+                if ($asset) {
+                    if ($asset->isBulk()) {
+                        $asset->update([
+                            'quantity' => $asset->quantity + 1,
+                            'status' => Asset::BULK_STATUS_AVAILABLE,
+                        ]);
+                    } else {
+                        $asset->update([
+                            'status' => Asset::SINGLE_STATUS_AVAILABLE
+                        ]);
+                    }
+                }
+            }
+
+            ActivityLogger::log('return_asset', "Memproses pengembalian aset {$borrowing->asset?->name} oleh {$borrowing->borrower_name}", $borrowing);
+
+            return $borrowing;
         });
 
+        // Hapus cache statistik agar dashboard langsung terupdate
+        Cache::forget('dashboard_stats');
+
         // Muat ulang data terbaru relasi aset
-        $borrowing->load('asset');
+        $borrowing->load(['asset' => fn($q) => $q->withTrashed(), 'asset.category', 'asset.location']);
 
         return response()->json([
             'message' => 'Success',
             'data' => new AssetBorrowingResource($borrowing)
         ], 200);
-
     }
 }

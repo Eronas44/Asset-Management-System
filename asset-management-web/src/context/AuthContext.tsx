@@ -7,7 +7,8 @@ interface AuthContextType {
   roles: string[];
   permissions: string[];
   loading: boolean;
-  refreshProfile: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfileResponse | null>;
+  setAuthData: (data: { user: User; roles?: string[]; permissions?: string[] }) => void;
   hasPermission: (permission: string) => boolean;
 }
 
@@ -17,20 +18,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-    const refreshProfile = async () => {
+  const setAuthData = (data: { user: User; roles?: string[]; permissions?: string[] }) => {
+    setProfile({
+      user: data.user,
+      roles: data.roles || [],
+      permissions: data.permissions || [],
+    });
+    setLoading(false);
+  };
+
+  const refreshProfile = async (): Promise<UserProfileResponse | null> => {
     // Pastikan fungsi ini dipanggil hanya jika token ada di lokal
     const token = localStorage.getItem('auth_token');
     if (!token) {
       setLoading(false);
-      return;
+      return null;
     }
 
     try {
       const data = await authService.getProfile();
       setProfile(data);
+      return data;
     } catch (err) {
       console.error('Gagal memuat profil hak akses:', err);
       setProfile(null);
+      return null;
     } finally {
       setLoading(false);
     }
@@ -41,9 +53,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfile();
   }, []);
 
-  // Sumber kebenaran tunggal untuk pengecekan hak akses di frontend
+  // Sumber kebenaran tunggal untuk pengecekan hak akses di frontend.
+  // Mendukung sintaks OR dengan pipe, misal: "manage-assets|manage-borrowings"
   const hasPermission = (permission: string): boolean => {
     if (!profile) return false;
+    if (permission.includes('|')) {
+      return permission.split('|').some((p) => profile.permissions.includes(p.trim()));
+    }
     return profile.permissions.includes(permission);
   };
 
@@ -54,6 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       permissions: profile?.permissions || [], 
       loading, 
       refreshProfile,
+      setAuthData,
       hasPermission 
     }}>
       {children}

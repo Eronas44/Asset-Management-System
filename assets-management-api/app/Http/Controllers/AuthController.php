@@ -58,7 +58,7 @@ public function login(Request $request): JsonResponse
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Kredensial yang Anda masukkan salah.'
-            ], 421);
+            ], 401);
         }
 
         // 4. Hapus token lama (Opsional: Memastikan hanya ada 1 sesi aktif per akun)
@@ -69,7 +69,7 @@ public function login(Request $request): JsonResponse
 
         ActivityLogger::log('login', "Pengguna {$user->name} berhasil masuk ke dalam sistem aplikasi.");
 
-        // 6. Kembalikan respons JSON yang konsisten
+        // 6. Kembalikan respons JSON yang konsisten lengkap dengan roles dan permissions
         return response()->json([
                 'message' => 'Success',
                 'data' => [
@@ -80,29 +80,47 @@ public function login(Request $request): JsonResponse
                         'email' => $user->email,
                         'created_at' => $user->created_at,
                         'updated_at' => $user->updated_at,
-                    ]
+                    ],
+                    'roles' => $user->getRoleNames(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
                 ]
             ], 200);
     }
 
     /**
- * Mengambil profil data user beserta role dan permission aktif.
- */
-public function me(Request $request): JsonResponse
-{
-    $user = $request->user();
+     * Mengambil profil data user beserta role dan permission aktif.
+     */
+    public function me(Request $request): JsonResponse
+    {
+        $user = $request->user();
 
-    return response()->json([
-        'user' => [
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'created_at' => $user->created_at,
-            'updated_at' => $user->updated_at,
-        ],
-        // Mengambil hanya nama role dan nama permission ke dalam bentuk array string sederhana
-        'roles' => $user->getRoleNames(), 
-        'permissions' => $user->getAllPermissions()->pluck('name'),
-    ], 200);
-}
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'created_at' => $user->created_at,
+                'updated_at' => $user->updated_at,
+            ],
+            // Mengambil hanya nama role dan nama permission ke dalam bentuk array string sederhana
+            'roles' => $user->getRoleNames(), 
+            'permissions' => $user->getAllPermissions()->pluck('name'),
+        ], 200);
+    }
+
+    /**
+     * Mencabut token akses sesi aktif pengguna saat ini.
+     */
+    public function logout(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if ($user) {
+            $user->currentAccessToken()->delete();
+            ActivityLogger::log('logout', "Pengguna {$user->name} keluar dari sistem.");
+        }
+
+        return response()->json([
+            'message' => 'Berhasil keluar dari sistem.'
+        ], 200);
+    }
 }

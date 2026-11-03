@@ -23,29 +23,42 @@ Route::get('/health', function () {
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:login');
 Route::get('/public/assets/{uuid}', [AssetController::class, 'showPublic']);
 
-
 // =========================================================================
 // ENDPOINT TERPROTEKSI (Wajib Login & Cek Permission)
 // =========================================================================
 Route::middleware('auth:sanctum')->group(function () {
     
-    // Profil user bisa diakses oleh siapa saja yang sudah login
+    // Profil dan sesi user bisa diakses oleh siapa saja yang sudah login
     Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Grup Hak Akses: manage-master-data
-    Route::middleware('permission:manage-master-data')->group(function () {
+    // Baca master data (kategori/lokasi) untuk alur inventaris & peminjaman
+    Route::middleware('permission:manage-master-data|manage-assets|manage-borrowings')->group(function () {
         Route::get('/asset-categories', [AssetCategoryController::class, 'index']);
-        Route::post('/asset-categories', [AssetCategoryController::class, 'store']);
-        
         Route::get('/asset-locations', [AssetLocationController::class, 'index']);
-        Route::post('/asset-locations', [AssetLocationController::class, 'store']);
     });
 
-    // Grup Hak Akses: manage-assets
-    Route::middleware('permission:manage-assets')->group(function () {
+    // Tulis master data hanya untuk pengelola master data
+    Route::middleware('permission:manage-master-data')->group(function () {
+        Route::post('/asset-categories', [AssetCategoryController::class, 'store']);
+        Route::match(['put', 'patch'], '/asset-categories/{id}', [AssetCategoryController::class, 'update']);
+        Route::delete('/asset-categories/{id}', [AssetCategoryController::class, 'destroy']);
+
+        Route::post('/asset-locations', [AssetLocationController::class, 'store']);
+        Route::match(['put', 'patch'], '/asset-locations/{id}', [AssetLocationController::class, 'update']);
+        Route::delete('/asset-locations/{id}', [AssetLocationController::class, 'destroy']);
+    });
+
+    // Grup Hak Akses: manage-assets & read assets
+    Route::middleware('permission:manage-assets|manage-borrowings')->group(function () {
         Route::get('/assets', [AssetController::class, 'index']);
-        Route::post('/assets', [AssetController::class, 'store']);
         Route::get('/assets/{id}', [AssetController::class, 'show']);
+    });
+
+    Route::middleware('permission:manage-assets')->group(function () {
+        Route::post('/assets', [AssetController::class, 'store']);
+        Route::match(['put', 'patch'], '/assets/{id}', [AssetController::class, 'update']);
+        Route::delete('/assets/{id}', [AssetController::class, 'destroy']);
     });
 
     // Grup Hak Akses Manajemen Pengguna: manage-users

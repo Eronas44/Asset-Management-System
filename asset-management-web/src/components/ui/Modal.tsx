@@ -7,6 +7,7 @@ interface ModalProps {
   description?: string;
   onClose: () => void;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidthClassName?: string;
 }
 
@@ -16,6 +17,7 @@ const Modal: React.FC<ModalProps> = ({
   description,
   onClose,
   children,
+  footer,
   maxWidthClassName = 'max-w-3xl'
 }) => {
   useEffect(() => {
@@ -41,25 +43,31 @@ const Modal: React.FC<ModalProps> = ({
         onClick={onClose}
         className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
       />
-      <div className={`relative z-10 w-full ${maxWidthClassName} overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900`}>
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+      <div className={`relative z-10 w-full ${maxWidthClassName} overflow-hidden rounded-md border border-slate-200/90 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900 flex flex-col`}>
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200/80 px-6 py-4 dark:border-slate-800">
           <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
-            {description && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{title}</h3>
+            {description && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
             aria-label="Close modal"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <div className="max-h-[85vh] overflow-y-auto px-6 py-6">
+        <div className={`overflow-y-auto px-6 py-6 ${footer ? 'max-h-[68vh]' : 'max-h-[85vh]'}`}>
           {children}
         </div>
+
+        {footer && (
+          <div className="flex items-center justify-end gap-2.5 border-t border-slate-200/80 bg-slate-50/70 px-6 py-3.5 dark:border-slate-800 dark:bg-slate-900/80">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

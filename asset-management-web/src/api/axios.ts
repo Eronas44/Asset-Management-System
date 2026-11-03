@@ -1,8 +1,19 @@
 import axios from 'axios';
 import { getToken, removeToken } from '../utils/token';
 
+export const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined' && window.location) {
+    const hostname = window.location.hostname;
+    // Jika diakses dari HP atau device jaringan lokal via IP (bukan localhost/127.0.0.1)
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `${window.location.protocol}//${hostname}:2020/api`;
+    }
+  }
+  return import.meta.env.VITE_API_URL || 'http://localhost:2020/api';
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
@@ -12,6 +23,7 @@ const api = axios.create({
 // Request Interceptor
 api.interceptors.request.use(
   (config) => {
+    config.baseURL = getApiBaseUrl();
     const token = getToken();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -36,8 +48,8 @@ api.interceptors.response.use(
           window.location.href = '/login';
           break;
         case 403:
-          // Skenario 403: Akses ditolak, alihkan ke halaman forbidden
-          window.location.href = '/forbidden';
+          // Skenario 403: Akses aksi ditolak, biarkan komponen menampilkan pesan error / toast tanpa merusak sesi halaman
+          console.warn(`[403 Forbidden] Akses ditolak. Trace ID: ${traceId}`);
           break;
         case 404:
           console.warn(`[404 Not Found] Trace ID: ${traceId}`);

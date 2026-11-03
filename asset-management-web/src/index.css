@@ -4,14 +4,7 @@
 
 @layer base {
 	html {
-		font-size: 13px;
 		color-scheme: light;
-	}
-
-	@media (min-width: 640px) {
-		html {
-			font-size: 14px;
-		}
 	}
 
 	html.dark {

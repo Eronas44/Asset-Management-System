@@ -23,7 +23,7 @@ class ActivityLogController extends Controller
     public function index(Request $request)
     {
         $filters = $request->only(['action', 'user_id', 'date_from', 'date_to']);
-        $perPage = $request->input('per_page', 10);
+        $perPage = max(1, min(100, (int) $request->input('per_page', 10)));
 
         $logs = ActivityLog::with('user')
             ->filter($filters)
