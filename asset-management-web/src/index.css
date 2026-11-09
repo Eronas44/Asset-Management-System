@@ -3,73 +3,50 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-warm-alabaster: #F4F3EF;
-  --color-deep-obsidian: #090D16;
-  --color-deep-slate: #0F172A;
-  --color-alabaster-card: #FFFFFF;
-  --color-alabaster-border: #E2E0D8;
-  --color-electric-blue: #2563EB;
-  --color-sky-cyan: #38BDF8;
-  --color-emerald-accent: #10B981;
-  --color-cyber-mint: #34D399;
-  --color-amber-accent: #F59E0B;
-  --color-rose-accent: #F43F5E;
+  --color-warm-cream: #FAF7F2;
+  --color-warm-stone: #E6E1D6;
+  --color-warm-divider: #EFECE6;
+  --color-warm-header: #F4F0EA;
+  --color-deep-petrol: #2B4C6F;
+  --color-estate-navy: #1E3A5F;
+  --color-marigold: #F4B752;
+  --color-dark-navy: #111822;
+  --color-slate-navy: #1A2433;
 }
 
 @layer base {
   :root {
-    --bg-primary: #F4F3EF;
-    --text-primary: #0F172A;
+    --bg-primary: #FAF7F2;
+    --text-primary: #334155;
     --card-bg: #FFFFFF;
-    --card-border: #E2E0D8;
+    --card-border: #E6E1D6;
     color-scheme: light;
   }
 
   html.dark {
-    --bg-primary: #090D16;
-    --text-primary: #F8FAFC;
-    --card-bg: rgba(17, 24, 39, 0.8);
-    --card-border: rgba(255, 255, 255, 0.1);
+    --bg-primary: #111822;
+    --text-primary: #FAF7F2;
+    --card-bg: #1A2433;
+    --card-border: #2A374A;
     color-scheme: dark;
   }
 
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    @apply antialiased transition-colors duration-300;
+    @apply antialiased transition-colors duration-200;
   }
 }
 
-/* Glassmorphic Bento utilities */
-.bento-card-light {
+/* Tactile SaaS Card utilities */
+.tactile-card {
   background-color: #FFFFFF;
-  border: 1px solid #E2E0D8;
+  border: 1px solid #E6E1D6;
 }
 
-.bento-card-dark {
-  background-color: rgba(17, 24, 39, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* Futuristic HUD Laser Animation for Scanner */
-@keyframes laserScan {
-  0% {
-    top: 0%;
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    top: 98%;
-    opacity: 0.8;
-  }
-}
-
-.animate-laser {
-  animation: laserScan 2s ease-in-out infinite alternate;
+.dark .tactile-card {
+  background-color: #1A2433;
+  border: 1px solid #2A374A;
 }
 
 /* Landscape mobile helpers */

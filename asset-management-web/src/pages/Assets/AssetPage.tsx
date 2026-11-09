@@ -422,14 +422,14 @@ const AssetPage: React.FC = () => {
     <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Header Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E2E0D8] pb-5 dark:border-white/10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E6E1D6] pb-5 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            <h1 className="text-xl font-bold tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
               Inventaris Aset Perusahaan
             </h1>
-            <span className="rounded-md border border-[#E2E0D8] bg-white/70 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-300">
-              Master Ledger
+            <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-xs font-semibold text-slate-900">
+              Buku Inventaris
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -440,7 +440,7 @@ const AssetPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+            className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2.5 text-xs font-semibold tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
           >
             <Plus size={16} strokeWidth={2.5} />
             <span>Tambah Aset</span>
@@ -463,10 +463,10 @@ const AssetPage: React.FC = () => {
         </div>
       )}
 
-      {/* Filter Toolbar (Bento Card) */}
-      <div className="rounded-2xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-900/70 shadow-xs backdrop-blur-md">
-        <div className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          <Filter size={13} className="text-blue-600 dark:text-sky-400" />
+      {/* Filter Toolbar */}
+      <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
+        <div className="mb-3 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
+          <Filter size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
           <span>Penyaringan Data</span>
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-center">
@@ -479,7 +479,7 @@ const AssetPage: React.FC = () => {
               placeholder="Cari kode atau nama aset..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 py-2 pl-9 pr-3 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
 
@@ -487,7 +487,7 @@ const AssetPage: React.FC = () => {
             <select
               value={filters.status}
               onChange={(e) => handleFilterChange('status', e.target.value)}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-200 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:focus:border-[#F4B752]"
             >
               <option value="">Semua Status Operasional</option>
               {assetFilterStatusOptions.map((option) => (
@@ -502,7 +502,7 @@ const AssetPage: React.FC = () => {
             <select
               value={filters.asset_category_id}
               onChange={(e) => handleFilterChange('asset_category_id', e.target.value ? Number(e.target.value) : '')}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-200 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:focus:border-[#F4B752]"
             >
               <option value="">Semua Kategori</option>
               {categories.map((c) => (
@@ -517,7 +517,7 @@ const AssetPage: React.FC = () => {
             <select
               value={filters.asset_location_id}
               onChange={(e) => handleFilterChange('asset_location_id', e.target.value ? Number(e.target.value) : '')}
-              className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-200 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 text-xs text-slate-800 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:focus:border-[#F4B752]"
             >
               <option value="">Semua Lokasi</option>
               {locations.map((l) => (
@@ -530,16 +530,16 @@ const AssetPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Tabel Inventaris Aset (Bento Container) */}
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white dark:border-white/10 dark:bg-slate-900/70 shadow-xs backdrop-blur-md">
+      {/* Tabel Inventaris Aset */}
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
         
         {/* Table Top Toolbar */}
-        <div className="flex flex-col justify-between gap-3 border-b border-[#E2E0D8] p-4 sm:flex-row sm:items-center dark:border-slate-800">
+        <div className="flex flex-col justify-between gap-3 border-b border-[#E6E1D6] p-4 sm:flex-row sm:items-center dark:border-slate-800 bg-[#FAF7F2]/40 dark:bg-[#151D2A]/40">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
               Daftar Aset & Valuasi Buku
             </h2>
-            <span className="rounded-md border border-slate-200/80 bg-slate-100/80 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+            <span className="rounded-md border border-[#E6E1D6] bg-[#FAF7F2] px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300">
               {paginationMeta.total} Unit Terdaftar
             </span>
           </div>
@@ -550,12 +550,12 @@ const AssetPage: React.FC = () => {
               disabled={assets.length === 0}
               className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
                 selectedAssetIds.length > 0
-                  ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700 dark:bg-sky-400 dark:text-slate-950'
-                  : 'border-slate-200 bg-white/80 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-750'
+                  ? 'border-[#1E3A5F] bg-[#1E3A5F] text-[#FAF7F2] hover:bg-[#162D4A]'
+                  : 'border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200'
               }`}
               title="Cetak lembar stiker QR Code untuk unit aset"
             >
-              <Printer size={14} className={selectedAssetIds.length > 0 ? 'text-white dark:text-slate-950' : 'text-slate-600 dark:text-slate-400'} />
+              <Printer size={14} className={selectedAssetIds.length > 0 ? 'text-[#F4B752]' : 'text-slate-600 dark:text-slate-400'} />
               <span>
                 {selectedAssetIds.length > 0 
                   ? `Cetak Label QR (${selectedAssetIds.length})` 
@@ -568,7 +568,7 @@ const AssetPage: React.FC = () => {
                 <button 
                   onClick={handleExportCsv} 
                   disabled={exportLoading.csv}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-750"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-[#FAF7F2] disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   {exportLoading.csv ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-slate-800 dark:border-slate-600 dark:border-t-slate-200" />
@@ -580,7 +580,7 @@ const AssetPage: React.FC = () => {
                 <button 
                   onClick={handleExportPdf} 
                   disabled={exportLoading.pdf}
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-750"
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-[#FAF7F2] disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:hover:bg-slate-800"
                 >
                   {exportLoading.pdf ? (
                     <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-slate-800 dark:border-slate-600 dark:border-t-slate-200" />
@@ -598,15 +598,15 @@ const AssetPage: React.FC = () => {
         <div className="flex-1 overflow-x-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 dark:text-slate-500">
-              <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-blue-600 dark:border-slate-700 dark:border-t-sky-400" />
+              <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A5F] dark:border-slate-700 dark:border-t-[#F4B752]" />
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Sinkronisasi data inventaris aset...</p>
             </div>
           ) : assets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-500">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] text-slate-500 dark:border-slate-800 dark:bg-[#111822] dark:text-slate-400">
                 <Package size={22} />
               </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
                 Tidak Ada Catatan Aset
               </h3>
               <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
@@ -615,23 +615,23 @@ const AssetPage: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* Tampilan Kartu Khusus Layar Mobile (< md) - Stacked Bento Cards */}
+              {/* Tampilan Kartu Khusus Layar Mobile (< md) */}
               <div className="md:hidden space-y-3 p-4">
                 {assets.map((asset) => (
-                  <div key={asset.id} className="rounded-xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-850/70 shadow-2xs space-y-3">
+                  <div key={asset.id} className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#151D2A] shadow-2xs space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-start gap-2.5">
                         <input
                           type="checkbox"
                           checked={selectedAssetIds.includes(asset.id)}
                           onChange={() => handleToggleSelectAsset(asset.id)}
-                          className="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          className="mt-1 h-4 w-4 rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
                         />
                         <div>
-                          <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                          <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
                             {asset.name}
                           </h4>
-                          <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200/80 dark:border-slate-700">
+                          <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
                             {asset.asset_code}
                           </span>
                         </div>
@@ -642,7 +642,7 @@ const AssetPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50/70 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 bg-[#FAF7F2]/70 dark:bg-[#111822]/60 p-3 rounded-xl border border-[#E6E1D6] dark:border-slate-800">
                       <div>
                         <span className="block text-[10px] text-slate-400">Kategori:</span>
                         <span className="font-medium text-slate-700 dark:text-slate-300">{asset.category?.name || '-'}</span>
@@ -661,12 +661,12 @@ const AssetPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[#E6E1D6] dark:border-slate-800">
                       <Link
                         to={`/assets/${asset.id}`}
-                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                        className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300"
                       >
-                        <Eye size={14} className="text-blue-600 dark:text-sky-400" />
+                        <Eye size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                         Detail
                       </Link>
 
@@ -675,7 +675,7 @@ const AssetPage: React.FC = () => {
                           type="button"
                           onClick={() => handleOpenSinglePrint(asset)}
                           title="Cetak Stiker Label QR"
-                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300"
                         >
                           <Printer size={14} className="text-slate-500" />
                           Label
@@ -686,9 +686,9 @@ const AssetPage: React.FC = () => {
                               type="button"
                               onClick={() => handleOpenEdit(asset)}
                               title="Edit Aset"
-                              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-2 text-xs font-medium text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300"
                             >
-                              <Pencil size={14} className="text-blue-600 dark:text-sky-400" />
+                              <Pencil size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                               Edit
                             </button>
                             <button
@@ -710,14 +710,14 @@ const AssetPage: React.FC = () => {
 
               {/* Tampilan Tabel Standar Desktop & Tablet (>= md) */}
               <table className="hidden md:table w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                <thead className="bg-slate-100/90 text-slate-700 border-b border-slate-200/90 text-[11px] font-semibold uppercase tracking-wider dark:bg-slate-900/90 dark:text-slate-300 dark:border-b dark:border-slate-800">
+                <thead className="bg-[#F4F0EA] text-[#2B4C6F] border-b border-[#E6E1D6] text-[11px] font-semibold uppercase tracking-wider dark:bg-[#151D2A] dark:text-[#FAF7F2] dark:border-b dark:border-slate-800">
                   <tr>
                     <th className="w-10 px-4 py-3 text-center">
                       <input
                         type="checkbox"
                         checked={selectedAssetIds.length === assets.length && assets.length > 0}
                         onChange={handleSelectAllOnPage}
-                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                        className="rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
                         title="Pilih Semua di Halaman Ini"
                       />
                     </th>
@@ -731,12 +731,12 @@ const AssetPage: React.FC = () => {
                     <th className="whitespace-nowrap px-4 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/70">
+                <tbody className="divide-y divide-[#EFECE6] dark:divide-slate-800/70">
                   {assets.map((asset) => (
                     <tr 
                       key={asset.id} 
-                      className={`transition-all hover:bg-slate-100/70 dark:hover:bg-indigo-950/30 ${
-                        selectedAssetIds.includes(asset.id) ? 'bg-blue-50/40 dark:bg-sky-950/20' : ''
+                      className={`transition-colors hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40 ${
+                        selectedAssetIds.includes(asset.id) ? 'bg-[#FAF7F2] dark:bg-slate-800/60' : ''
                       }`}
                     >
                       <td className="w-10 px-4 py-3.5 text-center">
@@ -744,7 +744,7 @@ const AssetPage: React.FC = () => {
                           type="checkbox"
                           checked={selectedAssetIds.includes(asset.id)}
                           onChange={() => handleToggleSelectAsset(asset.id)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                          className="rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
                         />
                       </td>
                       <td className="px-4 py-3.5">
@@ -752,12 +752,12 @@ const AssetPage: React.FC = () => {
                           {asset.name}
                         </div>
                         <div className="mt-1 flex items-center gap-2">
-                          <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-200/80 dark:border-slate-700">
+                          <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-1.5 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
                             {asset.asset_code}
                           </span>
                           <Link
                             to={`/assets/${asset.id}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400 dark:hover:text-sky-300 underline-offset-2 hover:underline transition-colors"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1E3A5F] hover:underline dark:text-[#F4B752] transition-colors"
                           >
                             <Eye size={12} />
                             Detail
@@ -772,7 +772,7 @@ const AssetPage: React.FC = () => {
                           <Info size={11} className="text-slate-400" />
                           <span>{asset.location?.name || '-'}</span>
                         </div>
-                        <div className="mt-1.5 inline-flex items-center gap-1.5 rounded border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
+                        <div className="mt-1.5 inline-flex items-center gap-1.5 rounded border border-[#E6E1D6] bg-[#FAF7F2] px-2 py-0.5 text-[10px] font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-300">
                           <span>{typeLabelMap[asset.type || 'single']}</span>
                           <span className="text-slate-400 dark:text-slate-500">•</span>
                           <span className="font-mono font-semibold">
@@ -798,7 +798,7 @@ const AssetPage: React.FC = () => {
                       <td className="px-4 py-3.5 text-center">
                         {asset.qr_code_url ? (
                           <div className="flex flex-col items-center gap-1.5">
-                            <div className="rounded-lg border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-950">
+                            <div className="rounded-lg border border-[#E6E1D6] bg-white p-1 dark:border-slate-700 dark:bg-slate-950">
                               <QRCodeSVG value={asset.uuid ? `${window.location.origin}/public/assets/${asset.uuid}` : (asset.qr_code_url || asset.asset_code)} size={34} />
                             </div>
                             <a
@@ -821,7 +821,7 @@ const AssetPage: React.FC = () => {
                             type="button"
                             onClick={() => handleOpenSinglePrint(asset)}
                             title="Cetak Stiker Label QR"
-                            className="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-white/80 px-2 py-1 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                            className="inline-flex items-center gap-1 rounded-lg border border-[#E6E1D6] bg-white px-2 py-1 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800"
                           >
                             <Printer size={12} className="text-slate-500" />
                             <span>Label</span>
@@ -832,16 +832,16 @@ const AssetPage: React.FC = () => {
                                 type="button"
                                 onClick={() => handleOpenEdit(asset)}
                                 title="Edit Aset"
-                                className="inline-flex items-center gap-1 rounded-lg border border-slate-200/80 bg-white/80 px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                                className="inline-flex items-center gap-1 rounded-lg border border-[#E6E1D6] bg-white px-2.5 py-1 text-xs font-medium text-slate-700 shadow-2xs transition-colors hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800"
                               >
-                                <Pencil size={12} className="text-blue-600 dark:text-sky-400" />
+                                <Pencil size={12} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                                 <span>Edit</span>
                               </button>
                               <button
                                 type="button"
                                 onClick={() => handleDelete(asset)}
                                 title="Hapus Aset"
-                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-800 shadow-2xs transition-all hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40"
+                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-800 shadow-2xs transition-colors hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40"
                               >
                                 <Trash2 size={12} className="text-rose-600 dark:text-rose-400" />
                                 <span>Hapus</span>
@@ -1091,22 +1091,22 @@ const AssetPage: React.FC = () => {
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
           </div>
-          <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 min-h-[44px]"
+              className="rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 min-h-[44px]"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={submitLoading}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:ring-2 focus:ring-[#1E3A5F]/30 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
             >
               {submitLoading ? (
                 <>
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white dark:border-slate-950/40 dark:border-t-slate-950" />
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   <span>Menyimpan...</span>
                 </>
               ) : (
@@ -1303,22 +1303,22 @@ const AssetPage: React.FC = () => {
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
           </div>
-          <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 min-h-[44px]"
+              className="rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 min-h-[44px]"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={submitLoading}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:ring-2 focus:ring-[#1E3A5F]/30 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
             >
               {submitLoading ? (
                 <>
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white dark:border-slate-950/40 dark:border-t-slate-950" />
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   <span>Menyimpan...</span>
                 </>
               ) : (

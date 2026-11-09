@@ -7,32 +7,41 @@ export type ThemePalette = {
   card: string;
   border: string;
   primaryText: string;
-  accentBrand: string; // Electric Blue (#2563EB) in Light, Sky Cyan (#38BDF8) in Dark
-  semanticEmerald: string; // Vault / Available / QR
-  semanticAmber: string; // Borrowed / Maintenance
-  semanticRose: string; // Overdue / Retired
+  deepPetrol: string; // #2B4C6F (Headings)
+  estateNavy: string; // #1E3A5F (Primary Solid Containers & Brand)
+  marigold: string;   // #F4B752 (Warm Accent & Indicators)
+  accentBrand: string; // #1E3A5F / #F4B752 for compatibility
+  semanticEmerald: string; // Available / Safe
+  semanticAmber: string;   // Borrowed / Warning
+  semanticRose: string;    // Overdue / Danger
 };
 
 export const THEME_PALETTES: Record<Theme, ThemePalette> = {
   light: {
-    bg: '#F4F3EF', // Warm Alabaster
-    card: '#FFFFFF', // Crisp White
-    border: '#E2E0D8', // 1px solid Alabaster Border
-    primaryText: '#0F172A', // Deep Slate
-    accentBrand: '#2563EB', // Professional Electric Blue
-    semanticEmerald: '#10B981', // Emerald
-    semanticAmber: '#F59E0B', // Amber
-    semanticRose: '#F43F5E', // Rose
+    bg: '#FAF7F2',          // Warm Cream
+    card: '#FFFFFF',        // Crisp White
+    border: '#E6E1D6',      // Warm Stone 1px border
+    primaryText: '#334155', // Charcoal Body
+    deepPetrol: '#2B4C6F',  // Deep Petrol Slate
+    estateNavy: '#1E3A5F',  // Estate Navy
+    marigold: '#F4B752',    // Marigold / Warm Ochre
+    accentBrand: '#1E3A5F',
+    semanticEmerald: '#10B981',
+    semanticAmber: '#D97706',
+    semanticRose: '#E11D48',
   },
   dark: {
-    bg: '#090D16', // Deep Obsidian
-    card: 'rgba(17, 24, 39, 0.8)', // #111827/80
-    border: 'rgba(255, 255, 255, 0.1)', // border-white/10
-    primaryText: '#F8FAFC',
-    accentBrand: '#38BDF8', // Sky Cyan
-    semanticEmerald: '#34D399', // Cyber Mint
-    semanticAmber: '#F59E0B', // Amber
-    semanticRose: '#F43F5E', // Rose
+    bg: '#111822',          // Warm Deep Navy-Charcoal
+    card: '#1A2433',        // Solid Slate-Navy
+    border: '#2A374A',      // Slate-Navy Border
+    primaryText: '#FAF7F2', // Warm Cream Text
+    deepPetrol: '#93C5FD',  // Lightened Petrol for contrast
+    estateNavy: '#1E3A5F',  // Estate Navy
+    marigold: '#F4B752',    // Marigold Accent
+    accentBrand: '#F4B752',
+    semanticEmerald: '#10B981',
+    semanticAmber: '#F59E0B',
+    semanticRose: '#F43F5E',
   },
 };
 
@@ -63,14 +72,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     document.documentElement.classList.toggle('dark', theme === 'dark');
     document.documentElement.setAttribute('data-theme', theme);
 
-    // Update browser theme-color meta tag for seamless status bar tinting
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
       metaThemeColor.setAttribute('name', 'theme-color');
       document.head.appendChild(metaThemeColor);
     }
-    metaThemeColor.setAttribute('content', theme === 'dark' ? '#090D16' : '#F4F3EF');
+    metaThemeColor.setAttribute('content', theme === 'dark' ? '#111822' : '#FAF7F2');
   }, [theme, initialized]);
 
   const toggleTheme = () => {

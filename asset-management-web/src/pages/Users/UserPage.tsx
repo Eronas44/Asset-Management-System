@@ -131,14 +131,14 @@ const UserPage: React.FC = () => {
     <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Header Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E2E0D8] pb-5 dark:border-white/10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E6E1D6] pb-5 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-xl font-bold tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
               Manajemen Pengguna
             </h1>
-            <span className="rounded-md border border-[#E2E0D8] bg-white/70 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-300">
-              {users.length} Akun Aktif
+            <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-xs font-semibold text-slate-900">
+              {users.length} Akun Terdaftar
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -149,7 +149,7 @@ const UserPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
         >
           <Plus size={16} strokeWidth={2.5} />
           <span>Tambah Pengguna</span>
@@ -173,24 +173,24 @@ const UserPage: React.FC = () => {
       )}
 
       {/* Users Table / Bento Card Container */}
-      <div className="overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white dark:border-white/10 dark:bg-slate-900/70 shadow-xs backdrop-blur-md">
+      <div className="overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
         
-        {/* Mobile View: Thumb-friendly Stacked Bento Cards */}
+        {/* Mobile View */}
         <div className="md:hidden space-y-3 p-4">
           {users.map((u) => {
             const isCurrent = currentUser?.id === u.id;
             return (
-              <div key={u.id} className="rounded-xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-850/70 shadow-2xs space-y-3">
+              <div key={u.id} className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#151D2A] shadow-2xs space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 font-mono text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] font-mono text-xs font-bold text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
                       {u.name.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="font-bold text-xs text-slate-900 dark:text-white">{u.name}</span>
+                        <span className="font-bold text-xs text-[#2B4C6F] dark:text-[#FAF7F2]">{u.name}</span>
                         {isCurrent && (
-                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-mono text-blue-700 dark:bg-sky-950 dark:text-sky-300">
+                          <span className="rounded bg-[#FAF7F2] px-1.5 py-0.5 text-[9px] font-mono text-[#1E3A5F] border border-[#E6E1D6] dark:bg-[#111822] dark:text-[#F4B752] dark:border-slate-800">
                             Anda
                           </span>
                         )}
@@ -204,7 +204,7 @@ const UserPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E6E1D6] dark:border-slate-800 text-[11px]">
                   <span className="text-slate-400 font-mono">
                     {new Date(u.created_at).toLocaleDateString('id-ID', {
                       day: 'numeric',
@@ -217,7 +217,7 @@ const UserPage: React.FC = () => {
                     onChange={(e) => initiateRoleChange(u.id, e.target.value, u.name)}
                     disabled={isCurrent}
                     title={isCurrent ? 'Anda tidak dapat mengubah peran akun Anda sendiri' : 'Ubah wewenang pengguna'}
-                    className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-2xs outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-400"
+                    className="h-10 rounded-xl border border-[#E6E1D6] bg-white px-3 text-xs text-slate-700 shadow-2xs outline-none transition-all focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F]/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:focus:border-[#F4B752]"
                   >
                     <option value="staff">Staff</option>
                     <option value="admin">Admin</option>
@@ -231,8 +231,8 @@ const UserPage: React.FC = () => {
 
         {/* Desktop View: Ledger Table */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="min-w-full divide-y divide-slate-200 text-left text-xs dark:divide-slate-800">
-            <thead className="bg-slate-100/90 text-slate-700 border-b border-slate-200/90 text-[11px] font-semibold uppercase tracking-wider dark:bg-slate-900/90 dark:text-slate-300 dark:border-b dark:border-slate-800">
+          <table className="min-w-full text-left text-xs">
+            <thead className="bg-[#F4F0EA] text-[#2B4C6F] border-b border-[#E6E1D6] text-[11px] font-semibold uppercase tracking-wider dark:bg-[#151D2A] dark:text-[#FAF7F2] dark:border-b dark:border-slate-800">
               <tr>
                 <th className="px-5 py-3 font-semibold uppercase tracking-wider text-[11px]">Nama & Identitas</th>
                 <th className="px-5 py-3 font-semibold uppercase tracking-wider text-[11px]">Email Akses</th>
@@ -241,20 +241,20 @@ const UserPage: React.FC = () => {
                 <th className="px-5 py-3 text-right font-semibold uppercase tracking-wider text-[11px]">Aksi Penugasan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
+            <tbody className="divide-y divide-[#EFECE6] dark:divide-slate-800/80">
               {users.map((u) => {
                 const isCurrent = currentUser?.id === u.id;
                 return (
-                  <tr key={u.id} className="transition-all hover:bg-slate-100/70 dark:hover:bg-indigo-950/30">
+                  <tr key={u.id} className="transition-colors hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 font-mono text-[11px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] font-mono text-[11px] font-bold text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
                           {u.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <span className="font-semibold text-slate-900 dark:text-white">{u.name}</span>
                           {isCurrent && (
-                            <span className="ml-2 rounded-md border border-blue-200/80 bg-blue-50 px-1.5 py-0.5 text-[10px] font-mono text-blue-700 dark:border-sky-800/50 dark:bg-sky-950/40 dark:text-sky-300">
+                            <span className="ml-2 rounded-md border border-[#E6E1D6] bg-[#FAF7F2] px-1.5 py-0.5 text-[10px] font-mono text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
                               Akun Anda
                             </span>
                           )}
@@ -281,7 +281,7 @@ const UserPage: React.FC = () => {
                         onChange={(e) => initiateRoleChange(u.id, e.target.value, u.name)}
                         disabled={isCurrent}
                         title={isCurrent ? 'Anda tidak dapat mengubah peran akun Anda sendiri' : 'Ubah wewenang pengguna'}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 shadow-2xs outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-400"
+                        className="rounded-lg border border-[#E6E1D6] bg-white px-2.5 py-1 text-xs text-slate-700 shadow-2xs outline-none transition focus:border-[#1E3A5F] focus:ring-1 focus:ring-[#1E3A5F]/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:focus:border-[#F4B752]"
                       >
                         <option value="staff">Staff</option>
                         <option value="admin">Admin</option>
@@ -296,7 +296,7 @@ const UserPage: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-[#E2E0D8] bg-slate-50/50 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/50 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-[#E6E1D6] bg-[#FAF7F2]/50 px-5 py-3 dark:border-slate-800 dark:bg-[#151D2A]/50 sm:flex-row">
           <span className="text-xs text-slate-500 dark:text-slate-400">
             Halaman <span className="font-mono font-semibold text-slate-900 dark:text-white">{currentPage}</span> dari <span className="font-mono font-semibold text-slate-900 dark:text-white">{lastPage}</span>
           </span>
@@ -305,7 +305,7 @@ const UserPage: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-[#FAF7F2] disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800"
             >
               <ChevronLeft size={13} /> Sebelumnya
             </button>
@@ -313,7 +313,7 @@ const UserPage: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, lastPage))}
               disabled={currentPage === lastPage}
-              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-1 rounded-lg border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-[#FAF7F2] disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800"
             >
               Berikutnya <ChevronRight size={13} />
             </button>
@@ -339,7 +339,7 @@ const UserPage: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
             />
           </div>
 
@@ -352,7 +352,7 @@ const UserPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
             />
           </div>
 
@@ -365,7 +365,7 @@ const UserPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
             />
           </div>
 
@@ -376,7 +376,7 @@ const UserPage: React.FC = () => {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
             >
               <option value="staff">Staff (Operasional Standar)</option>
               <option value="admin">Admin (Manajemen Data & Aset)</option>
@@ -388,7 +388,7 @@ const UserPage: React.FC = () => {
             <button
               type="submit"
               disabled={submitLoading}
-              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:ring-2 focus:ring-[#1E3A5F]/30 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
             >
               {submitLoading ? 'Memproses...' : <><UserCheck size={16} /> Daftarkan Pengguna</>}
             </button>

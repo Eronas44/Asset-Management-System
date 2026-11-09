@@ -12,8 +12,7 @@ import {
   Tag,
   Wallet,
   ShieldCheck,
-  User,
-  Sparkles
+  User
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { assetService } from '../../services/asset.service';
@@ -179,25 +178,25 @@ const AssetDetailPage: React.FC = () => {
     <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Top Header Card */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E2E0D8] pb-5 dark:border-white/10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E6E1D6] pb-5 dark:border-slate-800">
         <div>
           <Link
             to="/assets"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 dark:text-sky-400 hover:underline mb-2 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1E3A5F] dark:text-[#F4B752] hover:underline mb-2 transition-colors"
           >
             <ArrowLeft size={14} />
             <span>Kembali ke Inventaris</span>
           </Link>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
               {asset.name}
             </h1>
-            <span className="rounded-md border border-[#E2E0D8] bg-white/70 px-2.5 py-0.5 font-mono text-xs font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-300">
+            <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 font-mono text-xs font-semibold text-slate-900">
               {asset.asset_code}
             </span>
           </div>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Asset Digital Passport & Verifikasi Valuasi Finansial Terpusat.
+            Identitas unit, verifikasi kepemilikan, dan kalkulasi valuasi finansial aset.
           </p>
         </div>
 
@@ -214,46 +213,39 @@ const AssetDetailPage: React.FC = () => {
       {/* Asset Digital Passport Split-View */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
-        {/* Left Column: Sticky Visual Identity Card (Passport) */}
+        {/* Left Column: Sticky Visual Identity Card */}
         <div className="lg:col-span-5 lg:sticky lg:top-20 space-y-4">
-          <div className="overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white dark:border-white/10 dark:bg-slate-900/80 shadow-md backdrop-blur-xl">
+          <div className="overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
             
-            {/* Passport Hologram Banner */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 px-5 py-4 text-white">
-              <div className="relative z-10 flex items-center justify-between">
+            {/* Passport Banner (Solid Estate Navy) */}
+            <div className="bg-[#1E3A5F] px-5 py-4 text-[#FAF7F2]">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles size={16} className="text-sky-400" />
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-sky-300">
-                    Asset Digital Passport
+                  <ShieldCheck size={16} className="text-[#F4B752]" />
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-[#FAF7F2]">
+                    Kartu Identitas Aset
                   </span>
                 </div>
-                <span className="rounded-md bg-white/10 px-2 py-0.5 font-mono text-[10px] text-white/80">
+                <span className="rounded-md bg-[#F4B752] px-2 py-0.5 font-mono text-[10px] font-bold text-slate-900">
                   ID: #{asset.id}
                 </span>
               </div>
-              <div className="pointer-events-none absolute -right-4 -bottom-6 h-24 w-24 rounded-full bg-sky-500/20 blur-xl" />
             </div>
 
-            {/* Passport QR Core */}
+            {/* QR Core */}
             <div className="p-6 flex flex-col items-center text-center">
-              <div className="relative p-3 rounded-2xl border border-[#E2E0D8] bg-white shadow-inner dark:border-white/10 dark:bg-slate-950">
-                {/* HUD corner brackets */}
-                <span className="pointer-events-none absolute top-1 left-1 h-3 w-3 border-t-2 border-l-2 border-blue-600 dark:border-sky-400" />
-                <span className="pointer-events-none absolute top-1 right-1 h-3 w-3 border-t-2 border-r-2 border-blue-600 dark:border-sky-400" />
-                <span className="pointer-events-none absolute bottom-1 left-1 h-3 w-3 border-b-2 border-l-2 border-blue-600 dark:border-sky-400" />
-                <span className="pointer-events-none absolute bottom-1 right-1 h-3 w-3 border-b-2 border-r-2 border-blue-600 dark:border-sky-400" />
-
+              <div className="p-3.5 rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822]">
                 {publicAssetUrl ? (
                   <QRCodeSVG value={publicAssetUrl} size={150} />
                 ) : (
-                  <div className="flex h-36 w-36 items-center justify-center text-slate-300 dark:text-slate-600">
+                  <div className="flex h-36 w-36 items-center justify-center text-slate-400">
                     <QrCode size={48} />
                   </div>
                 )}
               </div>
 
               <div className="mt-4 space-y-1">
-                <p className="font-mono text-sm font-bold text-slate-900 dark:text-white">{asset.asset_code}</p>
+                <p className="font-mono text-sm font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">{asset.asset_code}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{asset.name}</p>
               </div>
 
@@ -262,21 +254,21 @@ const AssetDetailPage: React.FC = () => {
                   href={publicAssetPath}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-slate-100 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:text-sky-400"
+                  className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200"
                 >
-                  <ExternalLink size={13} className="text-blue-600 dark:text-sky-400" />
+                  <ExternalLink size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                   <span>Buka Portal Verifikasi Publik</span>
                 </a>
               )}
             </div>
 
             {/* Lifecycle Progress Bar */}
-            <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="px-6 py-4 border-t border-[#E6E1D6] dark:border-slate-800 bg-[#FAF7F2]/50 dark:bg-[#151D2A]/50">
               <div className="flex items-center justify-between text-xs mb-1.5">
                 <span className="font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider text-[11px]">
                   Siklus Masa Manfaat
                 </span>
-                <span className="font-mono font-bold text-slate-900 dark:text-white">
+                <span className="font-mono font-bold text-[#1E3A5F] dark:text-[#FAF7F2]">
                   {lifecycleMeta.percentage}% ({lifecycleMeta.ageYears} / {lifecycleMeta.totalYears} Thn)
                 </span>
               </div>
@@ -287,7 +279,7 @@ const AssetDetailPage: React.FC = () => {
                       ? 'bg-rose-500' 
                       : lifecycleMeta.percentage > 60 
                         ? 'bg-amber-500' 
-                        : 'bg-emerald-500'
+                        : 'bg-emerald-600'
                   }`}
                   style={{ width: `${lifecycleMeta.percentage}%` }}
                 />
@@ -295,10 +287,10 @@ const AssetDetailPage: React.FC = () => {
             </div>
 
             {/* Custodian & Verification Details */}
-            <div className="p-6 border-t border-slate-100 dark:border-slate-800 space-y-3 text-xs">
+            <div className="p-6 border-t border-[#E6E1D6] dark:border-slate-800 space-y-3 text-xs">
               <div className="flex items-center justify-between">
                 <span className="inline-flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
-                  <User size={13} className="text-blue-600 dark:text-sky-400" /> Penanggung Jawab
+                  <User size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" /> Penanggung Jawab
                 </span>
                 <span className="font-semibold text-slate-800 dark:text-slate-200">
                   {activeBorrowing ? activeBorrowing.borrower_name : (asset.location?.name ? `Lokasi: ${asset.location.name}` : 'Penyimpanan Master')}
@@ -328,14 +320,14 @@ const AssetDetailPage: React.FC = () => {
         <div className="lg:col-span-7 space-y-5">
           
           {/* Segmented Tab Controls */}
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E2E0D8] bg-white p-1.5 dark:border-white/10 dark:bg-slate-900/70 shadow-xs backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-[#E6E1D6] bg-white p-1.5 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
             <button
               type="button"
               onClick={() => setActiveTab('specs')}
               className={`flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                 activeTab === 'specs'
-                  ? 'bg-blue-600 text-white shadow-sm dark:bg-sky-400 dark:text-slate-950'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
+                  ? 'bg-[#1E3A5F] text-[#FAF7F2] shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-[#FAF7F2] dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
               }`}
             >
               <Tag size={14} />
@@ -346,8 +338,8 @@ const AssetDetailPage: React.FC = () => {
               onClick={() => setActiveTab('depreciation')}
               className={`flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                 activeTab === 'depreciation'
-                  ? 'bg-blue-600 text-white shadow-sm dark:bg-sky-400 dark:text-slate-950'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
+                  ? 'bg-[#1E3A5F] text-[#FAF7F2] shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-[#FAF7F2] dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
               }`}
             >
               <Wallet size={14} />
@@ -358,8 +350,8 @@ const AssetDetailPage: React.FC = () => {
               onClick={() => setActiveTab('circulation')}
               className={`flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                 activeTab === 'circulation'
-                  ? 'bg-blue-600 text-white shadow-sm dark:bg-sky-400 dark:text-slate-950'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
+                  ? 'bg-[#1E3A5F] text-[#FAF7F2] shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-[#FAF7F2] dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
               }`}
             >
               <History size={14} />
@@ -370,31 +362,31 @@ const AssetDetailPage: React.FC = () => {
               onClick={() => setActiveTab('audit')}
               className={`flex-1 inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
                 activeTab === 'audit'
-                  ? 'bg-blue-600 text-white shadow-sm dark:bg-sky-400 dark:text-slate-950'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
+                  ? 'bg-[#1E3A5F] text-[#FAF7F2] shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-[#FAF7F2] dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800'
               }`}
             >
               <ReceiptText size={14} />
-              <span>Log Audit ({activityLogs.length})</span>
+              <span>Log Riwayat ({activityLogs.length})</span>
             </button>
           </div>
 
           {/* Tab 1: Spesifikasi & Identitas */}
           {activeTab === 'specs' && (
-            <div className="rounded-2xl border border-[#E2E0D8] bg-white p-6 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70 space-y-5">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+            <div className="rounded-2xl border border-[#E6E1D6] bg-white p-6 shadow-xs dark:border-slate-800 dark:bg-[#1A2433] space-y-5">
+              <div className="flex items-center justify-between border-b border-[#E6E1D6] pb-3 dark:border-slate-800">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
                     <Tag size={15} />
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">Identitas Teknis & Alokasi</h2>
+                    <h2 className="text-sm font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">Identitas Teknis & Alokasi</h2>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">Parameter fisik, lokasi penempatan, dan catatan perolehan</p>
                   </div>
                 </div>
               </div>
 
-              <dl className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
+              <dl className="divide-y divide-[#EFECE6] text-xs dark:divide-slate-800">
                 <div className="flex items-center justify-between py-3">
                   <dt className="text-slate-500 dark:text-slate-400 font-medium">Kode Registrasi Resmi</dt>
                   <dd className="font-mono font-bold text-slate-900 dark:text-white">{asset.asset_code}</dd>
@@ -407,7 +399,7 @@ const AssetDetailPage: React.FC = () => {
                   <dt className="text-slate-500 dark:text-slate-400 font-medium">Klasifikasi Tipe</dt>
                   <dd className="flex items-center gap-2 font-medium text-slate-900 dark:text-white">
                     <span>{typeLabels[asset.type || 'single']}</span>
-                    <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-mono font-semibold text-blue-700 dark:bg-sky-950 dark:text-sky-300">
+                    <span className="rounded-md bg-[#FAF7F2] border border-[#E6E1D6] px-2 py-0.5 text-[10px] font-mono font-semibold text-[#1E3A5F] dark:bg-[#111822] dark:border-slate-700 dark:text-[#F4B752]">
                       {asset.quantity ?? 1} Unit
                     </span>
                   </dd>
@@ -439,17 +431,19 @@ const AssetDetailPage: React.FC = () => {
           {/* Tab 2: Valuasi Fiskal & Depresiasi */}
           {activeTab === 'depreciation' && (
             <div className="space-y-4">
-              {/* Financial Hero Vault Card */}
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-emerald-950 p-6 text-white shadow-xl">
+              {/* Solid Estate Navy Block for Financial Card */}
+              <div className="rounded-2xl bg-[#1E3A5F] p-6 text-[#FAF7F2] shadow-md border border-[#1E3A5F]">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-emerald-300">
-                    <ShieldCheck size={14} /> Straight-Line Book Value
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#FAF7F2]/90">
+                    <ShieldCheck size={14} className="text-[#F4B752]" /> Metode Garis Lurus (Straight-Line)
                   </span>
-                  <span className="font-mono text-xs text-emerald-400/80">Audit Ready</span>
+                  <span className="rounded-full bg-[#F4B752] text-slate-900 font-semibold px-2.5 py-0.5 text-xs">
+                    Audit Ready
+                  </span>
                 </div>
                 <div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400 font-semibold">Total Nilai Buku Fiskal Saat Ini</p>
-                  <p className="mt-2 font-mono text-3xl font-extrabold tracking-tight text-white">
+                  <p className="text-xs uppercase tracking-widest text-[#FAF7F2]/75 font-semibold">Total Nilai Buku Fiskal Saat Ini</p>
+                  <p className="mt-2 font-mono text-3xl font-bold tracking-tight text-[#FAF7F2]">
                     {formatRupiah(asset.current_book_value)}
                   </p>
                 </div>
@@ -457,21 +451,21 @@ const AssetDetailPage: React.FC = () => {
 
               {/* Sub-grid of Financial Metrics */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-900/70 shadow-xs">
+                <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Harga Perolehan Awal</p>
-                  <p className="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">{formatRupiah(asset.purchase_price)}</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-[#1E3A5F] dark:text-[#FAF7F2]">{formatRupiah(asset.purchase_price)}</p>
                 </div>
-                <div className="rounded-2xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-900/70 shadow-xs">
+                <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Estimasi Nilai Residu</p>
-                  <p className="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">{formatRupiah(asset.residual_value)}</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-slate-800 dark:text-slate-200">{formatRupiah(asset.residual_value)}</p>
                 </div>
-                <div className="rounded-2xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-900/70 shadow-xs">
+                <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Masa Manfaat Aset</p>
-                  <p className="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">{asset.useful_life_years} Tahun</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-slate-800 dark:text-slate-200">{asset.useful_life_years} Tahun</p>
                 </div>
-                <div className="rounded-2xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-900/70 shadow-xs">
+                <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Beban Depresiasi / Tahun</p>
-                  <p className="mt-1 font-mono text-lg font-bold text-slate-900 dark:text-white">{formatRupiah(asset.annual_depreciation)}</p>
+                  <p className="mt-1 font-mono text-lg font-bold text-slate-800 dark:text-slate-200">{formatRupiah(asset.annual_depreciation)}</p>
                 </div>
               </div>
             </div>
@@ -479,16 +473,16 @@ const AssetDetailPage: React.FC = () => {
 
           {/* Tab 3: Sirkulasi Peminjaman */}
           {activeTab === 'circulation' && (
-            <div className="rounded-2xl border border-[#E2E0D8] bg-white p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800 mb-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
+            <div className="rounded-2xl border border-[#E6E1D6] bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-[#1A2433]">
+              <div className="flex items-center justify-between border-b border-[#E6E1D6] pb-3 dark:border-slate-800 mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
                   Riwayat Sirkulasi Penggunaan
                 </h3>
                 <span className="font-mono text-xs text-slate-500">{borrowingHistory.length} Transaksi</span>
               </div>
 
               {borrowingHistory.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <div className="rounded-xl border border-dashed border-[#E6E1D6] p-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
                   Belum ada catatan sirkulasi peminjaman untuk aset ini.
                 </div>
               ) : (
@@ -496,7 +490,7 @@ const AssetDetailPage: React.FC = () => {
                   {borrowingHistory.map((item) => {
                     const isReturned = Boolean(item.returned_at);
                     return (
-                      <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-850/60 space-y-2">
+                      <div key={item.id} className="rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 p-4 dark:border-slate-800 dark:bg-[#151D2A] space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-xs text-slate-900 dark:text-white">{item.borrower_name}</span>
                           <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
@@ -508,7 +502,7 @@ const AssetDetailPage: React.FC = () => {
                             {isReturned ? 'Selesai Dikembalikan' : 'Sedang Dipinjam'}
                           </span>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-slate-200/60 dark:border-slate-800">
+                        <div className="grid grid-cols-2 gap-2 font-mono text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-[#E6E1D6] dark:border-slate-800">
                           <div>
                             <span className="block text-[10px] text-slate-400">Waktu Pinjam:</span>
                             <span>{formatDate(item.borrowed_at)}</span>
@@ -526,25 +520,25 @@ const AssetDetailPage: React.FC = () => {
             </div>
           )}
 
-          {/* Tab 4: Log Audit Forensik */}
+          {/* Tab 4: Log Riwayat */}
           {activeTab === 'audit' && (
-            <div className="rounded-2xl border border-[#E2E0D8] bg-white p-5 shadow-xs backdrop-blur-md dark:border-white/10 dark:bg-slate-900/70">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800 mb-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  Jejak Audit Forensik Aset
+            <div className="rounded-2xl border border-[#E6E1D6] bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-[#1A2433]">
+              <div className="flex items-center justify-between border-b border-[#E6E1D6] pb-3 dark:border-slate-800 mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
+                  Catatan Riwayat & Aktivitas Aset
                 </h3>
                 <span className="font-mono text-xs text-slate-500">{activityLogs.length} Entri</span>
               </div>
 
               {activityLogs.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                  Belum ada catatan aktivitas forensik untuk unit ini.
+                <div className="rounded-xl border border-dashed border-[#E6E1D6] p-8 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                  Belum ada catatan aktivitas untuk unit ini.
                 </div>
               ) : (
-                <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+                <div className="relative pl-6 space-y-4 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#E6E1D6] dark:before:bg-slate-800">
                   {activityLogs.map((log) => (
                     <div key={log.id} className="relative space-y-1">
-                      <span className="absolute -left-6 top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-blue-600 dark:border-slate-900 dark:bg-sky-400" />
+                      <span className="absolute -left-6 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#1E3A5F] dark:border-slate-900 dark:bg-[#F4B752]" />
                       <div className="flex items-center justify-between">
                         <span className="font-mono text-[11px] font-semibold text-slate-900 dark:text-white">{log.operator}</span>
                         <span className="font-mono text-[10px] text-slate-400">{formatDate(log.created_at)}</span>

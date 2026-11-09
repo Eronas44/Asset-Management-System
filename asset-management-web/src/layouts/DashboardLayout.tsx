@@ -5,7 +5,7 @@ import {
   Monitor, Handshake, ScrollText, 
   FolderOpen, MapPin, LogOut, QrCode,
   BookOpen, Search, X, Grid,
-  ChevronRight, Sparkles, Shield
+  ChevronRight, ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/auth.service';
@@ -121,7 +121,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   // 4 Navigasi Utama untuk Tampilan Mobile Portrait
   const primaryMobilePaths = ['/dashboard', '/assets', '/borrowings', '/categories'];
   const primaryMobileItems = filteredNavItems.filter(item => primaryMobilePaths.includes(item.path));
-  // Sisanya masuk ke Bottom Sheet
   const sheetItems = filteredNavItems.filter(item => !primaryMobilePaths.includes(item.path));
 
   // Filter untuk Command Palette (Ctrl+K)
@@ -138,93 +137,80 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
   const userInitial = user?.name?.charAt(0).toUpperCase() || 'A';
 
   return (
-    <div className="relative min-h-screen w-full overflow-x-hidden font-sans text-left text-[#0F172A] bg-[#F4F3EF] dark:bg-[#090D16] dark:text-slate-100 transition-colors duration-300">
+    <div className="relative min-h-screen w-full overflow-x-hidden font-sans text-left text-slate-700 bg-[#FAF7F2] dark:bg-[#111822] dark:text-[#FAF7F2] transition-colors duration-200">
       
       {/* =========================================================================
-          TOP HUD BAR (Minimal Floating Header)
-          - Warm Alabaster: bg-white/80 border-[#E2E0D8]
-          - Deep Obsidian: dark:bg-[#111827]/80 dark:border-white/10 dark:backdrop-blur-xl
+          TOP HUD BAR (Warm Editorial Header)
       ========================================================================= */}
-      <header className="sticky top-0 z-30 flex h-14 max-lg:landscape:h-12 w-full items-center justify-between border-b border-[#E2E0D8] bg-white/80 px-3 backdrop-blur-xl transition-all dark:border-white/10 dark:bg-[#111827]/80 sm:px-6">
+      <header className="sticky top-0 z-30 flex h-14 max-lg:landscape:h-12 w-full items-center justify-between border-b border-[#E6E1D6] bg-white/90 px-4 backdrop-blur-md transition-all dark:border-slate-800 dark:bg-[#1A2433]/90 sm:px-6">
         
-        {/* Left Side: Brand Logo & Command Center Badge */}
+        {/* Left Side: Brand Logo & Title */}
         <div className="flex items-center gap-3">
-          <Link 
-            to="/dashboard" 
-            className="flex items-center gap-2.5 group cursor-pointer focus:outline-none"
-            title="Spatial Bento Command Center"
-          >
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-[#0F172A] to-slate-800 font-mono text-[11px] font-bold text-white shadow-xs dark:from-[#4F46E5] dark:to-[#10B981] dark:text-white transition-transform group-hover:scale-105">
+          <Link to="/dashboard" className="flex items-center gap-2.5 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1E3A5F] text-[#FAF7F2] font-bold text-sm shadow-xs transition-transform group-hover:scale-105">
               AM
             </div>
-            <div className="hidden xs:flex flex-col">
-              <span className="text-xs font-bold tracking-tight text-[#0F172A] dark:text-white leading-none">
-                AssetSystem
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-sm tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
+                Asset Management System
               </span>
-              <span className="text-[9px] font-mono uppercase tracking-widest text-[#10B981] dark:text-[#34D399] mt-0.5 flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] dark:bg-[#34D399] animate-pulse inline-block" />
-                Spatial Command
+              <span className="hidden sm:inline-flex bg-[#F4B752] text-[#1E293B] text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                Perusahaan
               </span>
             </div>
           </Link>
         </div>
 
-        {/* Center: Search Trigger (Ctrl+K) */}
-        <div className="flex items-center">
+        {/* Center / Search Action Trigger (Ctrl+K) */}
+        <div className="hidden md:flex items-center">
           <button
             onClick={() => setIsSearchPaletteOpen(true)}
-            className="flex min-h-[44px] sm:min-h-[38px] items-center gap-2.5 rounded-xl border border-[#E2E0D8] bg-[#F4F3EF]/80 px-3 py-1.5 text-xs text-slate-500 shadow-2xs transition-all hover:border-[#10B981] hover:bg-white hover:text-[#0F172A] dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-white/20 dark:hover:bg-white/10 dark:hover:text-slate-200"
-            title="Buka Pencarian Cepat (Ctrl+K)"
+            className="flex items-center gap-3 rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] px-3.5 py-1.5 text-xs text-slate-500 shadow-2xs transition-all hover:border-[#1E3A5F] hover:bg-white dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:border-slate-600 cursor-pointer w-64 justify-between"
             aria-label="Cari Cepat"
           >
-            <Search size={15} className="text-[#4F46E5] dark:text-[#6366F1]" />
-            <span className="hidden sm:inline font-medium text-slate-700 dark:text-slate-300">
-              Pencarian Cepat...
-            </span>
-            <span className="inline sm:hidden font-medium text-slate-700 dark:text-slate-300">
-              Cari
-            </span>
-            <kbd className="hidden md:inline-flex items-center gap-0.5 rounded border border-[#E2E0D8] bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500 dark:border-white/10 dark:bg-[#111827] dark:text-slate-400">
-              Ctrl K
+            <div className="flex items-center gap-2">
+              <Search size={14} className="text-[#2B4C6F] dark:text-[#F4B752]" />
+              <span>Cari navigasi atau menu...</span>
+            </div>
+            <kbd className="rounded border border-[#E6E1D6] bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-slate-500 dark:border-slate-700 dark:bg-[#1A2433] dark:text-slate-400">
+              Ctrl+K
             </kbd>
           </button>
         </div>
 
-        {/* Right Side: QR Scanner Shortcut, Theme Toggle & Profile Badge */}
+        {/* Right Side: Quick Action Scanner, Theme Toggle, Profile */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* Quick Scanner button (Visible on Desktop / Tablet) */}
+          {/* Quick Search on Mobile */}
           <button
-            onClick={() => setIsQrScannerOpen(true)}
-            className="hidden sm:inline-flex min-h-[44px] sm:min-h-[36px] cursor-pointer items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-50/70 px-3 py-1.5 text-xs font-semibold text-emerald-800 transition-all hover:bg-emerald-100 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-[#34D399] dark:hover:bg-emerald-900/50"
-            title="Pindai QR / Barcode Aset"
-            aria-label="Pindai QR"
+            onClick={() => setIsSearchPaletteOpen(true)}
+            className="flex md:hidden min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2 text-slate-600 hover:bg-[#FAF7F2] dark:text-slate-300 dark:hover:bg-slate-800"
+            aria-label="Pencarian"
           >
-            <QrCode size={15} />
-            <span className="hidden md:inline">Pindai QR</span>
+            <Search size={18} />
           </button>
 
-          {/* Theme Toggle */}
+          {/* Theme Toggle Button */}
           <ThemeToggleButton />
 
-          {/* Super Administrator Profile Badge & Dropdown Trigger */}
+          {/* User Profile Pill & Dropdown */}
           <div className="relative">
             <button
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex min-h-[44px] sm:min-h-[38px] cursor-pointer items-center gap-2 rounded-xl border border-[#E2E0D8] bg-white p-1.5 sm:px-2.5 sm:py-1.5 shadow-2xs transition-all hover:border-[#10B981] dark:border-white/10 dark:bg-[#111827] dark:hover:border-white/20"
-              aria-label="Profil Pengguna"
+              className="min-h-[44px] flex items-center gap-2.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs transition-all hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#1A2433] dark:hover:bg-slate-800 cursor-pointer"
+              aria-expanded={isProfileMenuOpen}
+              aria-label="Menu Pengguna"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-[#0F172A] to-indigo-950 font-mono text-xs font-bold text-white shadow-2xs dark:from-[#4F46E5] dark:to-[#10B981]">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#1E3A5F] font-mono text-xs font-bold text-[#FAF7F2]">
                 {userInitial}
               </div>
-              <div className="hidden text-left lg:block">
-                <p className="max-w-[120px] truncate text-xs font-bold text-[#0F172A] dark:text-slate-100 leading-tight">
+              <div className="hidden sm:block text-left">
+                <p className="truncate text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2] max-w-[120px]">
                   {user?.name || 'Administrator'}
                 </p>
-                <div className="flex items-center gap-1 text-[9px] font-mono text-[#10B981] dark:text-[#34D399]">
-                  <Shield size={10} />
-                  <span className="truncate uppercase font-medium">{roleLabel}</span>
-                </div>
+                <p className="text-[10px] font-medium text-slate-400 capitalize">
+                  {roleLabel}
+                </p>
               </div>
             </button>
 
@@ -235,19 +221,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                   className="fixed inset-0 z-40" 
                   onClick={() => setIsProfileMenuOpen(false)} 
                 />
-                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#E2E0D8] bg-white p-3 shadow-2xl backdrop-blur-xl z-50 dark:border-white/10 dark:bg-[#111827]/95 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center gap-3 border-b border-[#E2E0D8] pb-3 dark:border-white/10">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0F172A] font-mono text-sm font-bold text-white dark:bg-gradient-to-tr dark:from-[#4F46E5] dark:to-[#10B981]">
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl border border-[#E6E1D6] bg-white p-4 shadow-xl z-50 dark:border-slate-700 dark:bg-[#1A2433] animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center gap-3 border-b border-[#E6E1D6] pb-3 dark:border-slate-800">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1E3A5F] font-mono text-sm font-bold text-[#FAF7F2]">
                       {userInitial}
                     </div>
                     <div className="overflow-hidden">
-                      <p className="truncate text-xs font-bold text-[#0F172A] dark:text-white">
+                      <p className="truncate text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
                         {user?.name}
                       </p>
                       <p className="truncate text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                         {user?.email || 'admin@assetsystem.corp'}
                       </p>
-                      <span className="mt-1 inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-emerald-800 dark:bg-emerald-950/60 dark:text-[#34D399]">
+                      <span className="mt-1 inline-flex items-center gap-1 rounded bg-[#F4B752] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#1E293B]">
                         {roleLabel}
                       </span>
                     </div>
@@ -257,20 +243,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     <Link
                       to="/guide"
                       onClick={() => setIsProfileMenuOpen(false)}
-                      className="flex items-center justify-between rounded-lg px-2.5 py-2 text-slate-700 hover:bg-[#F4F3EF] dark:text-slate-300 dark:hover:bg-white/5"
+                      className="flex items-center justify-between rounded-lg px-2.5 py-2 text-slate-700 hover:bg-[#FAF7F2] dark:text-slate-300 dark:hover:bg-slate-800"
                     >
                       <span className="flex items-center gap-2">
-                        <BookOpen size={15} className="text-[#4F46E5] dark:text-[#6366F1]" />
+                        <BookOpen size={15} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                         Panduan & Bantuan
                       </span>
                       <ChevronRight size={14} className="text-slate-400" />
                     </Link>
                   </div>
 
-                  <div className="border-t border-[#E2E0D8] pt-2 dark:border-white/10">
+                  <div className="border-t border-[#E6E1D6] pt-2 dark:border-slate-800">
                     <button
                       onClick={handleLogout}
-                      className="flex w-full min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-50/80 py-2 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50"
+                      className="flex w-full min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-xl bg-rose-50 py-2 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/50"
                     >
                       <LogOut size={15} />
                       <span>Keluar Sesi</span>
@@ -285,10 +271,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       {/* =========================================================================
           MAIN PAGE CONTENT AREA
-          - Padding configured with safe-areas:
-            * Portrait / Mobile / Desktop: pb-28
-            * Landscape Mobile: pl-20 pb-6
-          - overflow-x-hidden to prevent horizontal shift
       ========================================================================= */}
       <main className="min-h-[calc(100vh-3.5rem)] max-lg:landscape:min-h-[calc(100vh-3rem)] overflow-x-hidden p-4 sm:p-6 lg:p-8 pb-32 sm:pb-36 max-lg:landscape:pl-20 max-lg:landscape:pb-8">
         <div className="mx-auto max-w-7xl">
@@ -298,49 +280,51 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       {/* =========================================================================
           1. DESKTOP FLOATING BOTTOM DOCK (lg: and up)
-          - macOS style glassmorphism dock for all 9 routes
+          - Solid Estate Navy (#1E3A5F) container
+          - Warm cream icons (#FAF7F2)
+          - Marigold (#F4B752) active indicator dot
       ========================================================================= */}
-      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden lg:flex items-center gap-1.5 p-2 rounded-2xl border border-[#E2E0D8] bg-white/90 dark:border-white/10 dark:bg-[#111827]/80 dark:backdrop-blur-xl shadow-[0_16px_40px_-8px_rgba(15,23,42,0.12)] dark:shadow-[0_16px_40px_-8px_rgba(0,0,0,0.7)] transition-all">
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 hidden lg:flex items-center gap-1.5 p-2 rounded-2xl border border-[#2B4C6F]/50 bg-[#1E3A5F] text-[#FAF7F2] shadow-xl transition-all">
         {filteredNavItems.map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`relative group flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-200 hover:-translate-y-1 active:translate-y-0 ${
+              className={`relative group flex flex-col items-center justify-center p-2.5 rounded-xl transition-all duration-150 hover:-translate-y-0.5 active:translate-y-0 ${
                 isActive
-                  ? 'bg-blue-600 text-white dark:bg-sky-400 dark:text-slate-950 shadow-md shadow-blue-500/25 dark:shadow-[0_0_15px_rgba(56,189,248,0.4)] font-semibold'
-                  : 'text-slate-600 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-300 hover:bg-[#F4F3EF] dark:hover:bg-white/10'
+                  ? 'bg-white/15 text-[#FAF7F2] font-semibold'
+                  : 'text-[#FAF7F2]/75 hover:text-[#FAF7F2] hover:bg-white/10'
               }`}
               aria-label={item.title}
             >
               {React.cloneElement(item.icon, { size: 19 })}
               
-              {/* macOS style floating tooltip */}
-              <div className="pointer-events-none absolute -top-10 scale-0 group-hover:scale-100 transition-transform origin-bottom duration-150 px-2.5 py-1 rounded-lg bg-[#0F172A] text-white dark:bg-[#111827] dark:text-slate-100 text-[11px] font-medium whitespace-nowrap shadow-xl border border-slate-700/50 dark:border-white/15">
+              {/* Tooltip */}
+              <div className="pointer-events-none absolute -top-10 scale-0 group-hover:scale-100 transition-transform origin-bottom duration-150 px-2.5 py-1 rounded-lg bg-slate-900 text-[#FAF7F2] text-[11px] font-medium whitespace-nowrap shadow-md border border-slate-700/50">
                 {item.title}
               </div>
 
-              {/* Active Dot Indicator */}
+              {/* Marigold Active Dot Indicator */}
               {isActive && (
-                <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-blue-600 dark:bg-sky-400" />
+                <span className="absolute -bottom-1 h-1.5 w-1.5 rounded-full bg-[#F4B752]" />
               )}
             </Link>
           );
         })}
 
         {/* Separator */}
-        <div className="h-6 w-px bg-[#E2E0D8] dark:bg-white/10 mx-1" />
+        <div className="h-6 w-px bg-white/20 mx-1" />
 
         {/* Action Button: QR Scanner */}
         <button
           onClick={() => setIsQrScannerOpen(true)}
-          className="relative group flex flex-col items-center justify-center p-2.5 rounded-xl text-[#10B981] dark:text-[#34D399] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 transition-all duration-200 hover:-translate-y-1 cursor-pointer"
+          className="relative group flex flex-col items-center justify-center p-2.5 rounded-xl text-[#F4B752] hover:bg-white/10 transition-all duration-150 hover:-translate-y-0.5 cursor-pointer"
           aria-label="Pindai QR"
           title="Pindai QR"
         >
           <QrCode size={19} />
-          <div className="pointer-events-none absolute -top-10 scale-0 group-hover:scale-100 transition-transform origin-bottom duration-150 px-2.5 py-1 rounded-lg bg-emerald-950 text-emerald-200 text-[11px] font-medium whitespace-nowrap shadow-xl border border-emerald-500/30">
+          <div className="pointer-events-none absolute -top-10 scale-0 group-hover:scale-100 transition-transform origin-bottom duration-150 px-2.5 py-1 rounded-lg bg-slate-900 text-[#F4B752] text-[11px] font-medium whitespace-nowrap shadow-md border border-slate-700/50">
             Pindai QR
           </div>
         </button>
@@ -348,15 +332,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       {/* =========================================================================
           2. MOBILE PORTRAIT FLOATING PILL BAR (< lg, portrait mode)
-          - 4 primary routes
-          - Elevated center action button for QrScannerModal ('Pindai QR')
-          - 'More' trigger for the remaining routes bottom sheet
+          - Solid Estate Navy (#1E3A5F)
+          - Warm cream icons & Marigold elevated QR button
       ========================================================================= */}
       <nav 
-        className="fixed bottom-4 inset-x-3 max-w-md mx-auto z-40 flex lg:hidden landscape:hidden items-center justify-between px-3 py-2 rounded-2xl border border-[#E2E0D8] bg-white/95 dark:border-white/10 dark:bg-[#111827]/85 backdrop-blur-xl shadow-[0_14px_35px_-5px_rgba(15,23,42,0.18)] dark:shadow-[0_14px_35px_-5px_rgba(0,0,0,0.7)]"
+        className="fixed bottom-4 inset-x-3 max-w-md mx-auto z-40 flex lg:hidden landscape:hidden items-center justify-between px-3 py-2 rounded-2xl border border-[#2B4C6F]/50 bg-[#1E3A5F] text-[#FAF7F2] shadow-xl"
         aria-label="Navigasi Bergerak"
       >
-        {/* Left Side: 2 Primary Routes (Dashboard, Inventaris Aset) */}
+        {/* Left Side: 2 Primary Routes */}
         {primaryMobileItems.slice(0, 2).map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
@@ -365,11 +348,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               to={item.path}
               className={`min-h-[44px] min-w-[44px] flex flex-col items-center justify-center rounded-xl p-1 transition-colors ${
                 isActive
-                  ? 'text-blue-600 dark:text-sky-400 font-bold'
-                  : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'text-[#F4B752] font-bold'
+                  : 'text-[#FAF7F2]/75 hover:text-[#FAF7F2]'
               }`}
             >
-              <div className={`p-1 rounded-lg ${isActive ? 'bg-blue-50 dark:bg-sky-400/15' : ''}`}>
+              <div className={`p-1 rounded-lg ${isActive ? 'bg-white/10' : ''}`}>
                 {React.cloneElement(item.icon, { size: 20 })}
               </div>
               <span className="text-[10px] tracking-tight">{item.title.split(' ')[0]}</span>
@@ -381,18 +364,18 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         <div className="relative -top-5 flex flex-col items-center">
           <button
             onClick={() => setIsQrScannerOpen(true)}
-            className="group flex h-14 w-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-gradient-to-tr from-emerald-600 via-emerald-500 to-teal-400 text-white shadow-[0_10px_25px_rgba(16,185,129,0.5)] ring-4 ring-[#F4F3EF] dark:ring-[#090D16] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="group flex h-14 w-14 min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-[#F4B752] text-slate-900 shadow-md ring-4 ring-[#FAF7F2] dark:ring-[#111822] transition-all hover:scale-105 active:scale-95 cursor-pointer"
             aria-label="Pindai QR"
             title="Pindai QR Aset"
           >
-            <QrCode size={24} className="transition-transform group-hover:rotate-12" />
+            <QrCode size={24} className="transition-transform group-hover:rotate-6" />
           </button>
-          <span className="mt-1 text-[10px] font-bold text-[#10B981] dark:text-[#34D399]">
+          <span className="mt-1 text-[10px] font-bold text-[#F4B752]">
             Pindai QR
           </span>
         </div>
 
-        {/* Right Side: 1 Primary Route (Peminjaman) & 'More' Trigger */}
+        {/* Right Side: 1 Primary Route & 'Lainnya' Trigger */}
         {primaryMobileItems.slice(2, 3).map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
@@ -401,11 +384,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               to={item.path}
               className={`min-h-[44px] min-w-[44px] flex flex-col items-center justify-center rounded-xl p-1 transition-colors ${
                 isActive
-                  ? 'text-blue-600 dark:text-sky-400 font-bold'
-                  : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
+                  ? 'text-[#F4B752] font-bold'
+                  : 'text-[#FAF7F2]/75 hover:text-[#FAF7F2]'
               }`}
             >
-              <div className={`p-1 rounded-lg ${isActive ? 'bg-blue-50 dark:bg-sky-400/15' : ''}`}>
+              <div className={`p-1 rounded-lg ${isActive ? 'bg-white/10' : ''}`}>
                 {React.cloneElement(item.icon, { size: 20 })}
               </div>
               <span className="text-[10px] tracking-tight">{item.title.split(' ')[0]}</span>
@@ -413,13 +396,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           );
         })}
 
-        {/* 'More' Trigger Button */}
         <button
           onClick={() => setIsMobileSheetOpen(true)}
           className={`min-h-[44px] min-w-[44px] flex flex-col items-center justify-center rounded-xl p-1 transition-colors cursor-pointer ${
             isMobileSheetOpen
-              ? 'text-blue-600 dark:text-sky-400 font-bold'
-              : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-slate-200'
+              ? 'text-[#F4B752] font-bold'
+              : 'text-[#FAF7F2]/75 hover:text-[#FAF7F2]'
           }`}
           aria-label="Menu Lainnya"
         >
@@ -431,40 +413,34 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       </nav>
 
       {/* =========================================================================
-          3. SLIDE-UP GLASSMORPHIC BOTTOM SHEET
-          - Displays remaining routes and controls on Mobile Portrait
+          3. SLIDE-UP TACTILE BOTTOM SHEET
       ========================================================================= */}
       {isMobileSheetOpen && (
         <div className="fixed inset-0 z-50 lg:hidden landscape:hidden">
-          {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-[#090D16]/60 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity"
             onClick={() => setIsMobileSheetOpen(false)}
           />
 
-          {/* Bottom Sheet Drawer */}
-          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-[#E2E0D8] bg-white/95 p-5 pb-8 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-[#111827]/95 max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
-            {/* Grab Handle */}
+          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-[#E6E1D6] bg-white p-5 pb-8 shadow-2xl dark:border-slate-800 dark:bg-[#1A2433] max-h-[85vh] overflow-y-auto animate-in slide-in-from-bottom duration-200">
             <div className="mx-auto h-1.5 w-12 rounded-full bg-slate-300 dark:bg-slate-700 mb-5" />
 
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-[#E2E0D8] dark:border-white/10">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D6] dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-[#10B981] dark:text-[#34D399]" />
-                <h3 className="text-sm font-bold text-[#0F172A] dark:text-white">
-                  Navigasi & Kendali Sistem
+                <ShieldCheck size={18} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                <h3 className="text-sm font-bold text-[#2B4C6F] dark:text-white">
+                  Navigasi Menu Lengkap
                 </h3>
               </div>
               <button 
                 onClick={() => setIsMobileSheetOpen(false)}
-                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-slate-400 hover:bg-[#F4F3EF] hover:text-[#0F172A] dark:hover:bg-white/10"
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-full text-slate-400 hover:bg-[#FAF7F2] hover:text-slate-800 dark:hover:bg-slate-800"
                 aria-label="Tutup Menu"
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* Remaining Routes Grid */}
             <div className="grid grid-cols-2 gap-2.5 py-4">
               {sheetItems.map((item) => {
                 const isActive = location.pathname.startsWith(item.path);
@@ -475,31 +451,30 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                     onClick={() => setIsMobileSheetOpen(false)}
                     className={`min-h-[48px] flex items-center gap-3 p-3 rounded-xl border transition-all ${
                       isActive
-                        ? 'border-blue-600 bg-blue-600 text-white dark:border-sky-400 dark:bg-sky-400 dark:text-slate-950 shadow-sm font-semibold'
-                        : 'border-[#E2E0D8] bg-[#F4F3EF]/60 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10'
+                        ? 'border-[#1E3A5F] bg-[#1E3A5F] text-white shadow-xs font-semibold dark:border-[#F4B752] dark:bg-[#F4B752] dark:text-slate-900'
+                        : 'border-[#E6E1D6] bg-[#FAF7F2] hover:bg-white dark:border-slate-800 dark:bg-[#111822] dark:hover:bg-slate-800'
                     }`}
                   >
-                    <div className={isActive ? 'text-white dark:text-slate-950' : 'text-blue-600 dark:text-sky-400'}>
+                    <div className={isActive ? 'text-inherit' : 'text-[#1E3A5F] dark:text-[#F4B752]'}>
                       {React.cloneElement(item.icon, { size: 18 })}
                     </div>
                     <div className="text-left overflow-hidden">
                       <p className="text-xs font-semibold truncate leading-tight">{item.title}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">{item.category}</p>
+                      <p className="text-[10px] opacity-75 truncate">{item.category}</p>
                     </div>
                   </Link>
                 );
               })}
             </div>
 
-            {/* User Session Bar */}
-            <div className="mt-2 border-t border-[#E2E0D8] pt-4 dark:border-white/10 flex items-center justify-between">
+            <div className="mt-2 border-t border-[#E6E1D6] pt-4 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#0F172A] font-mono text-xs font-bold text-white dark:bg-gradient-to-tr dark:from-[#4F46E5] dark:to-[#10B981]">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1E3A5F] font-mono text-xs font-bold text-[#FAF7F2]">
                   {userInitial}
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#0F172A] dark:text-slate-200">{user?.name}</p>
-                  <p className="text-[10px] font-mono text-[#10B981] dark:text-[#34D399] uppercase">{roleLabel}</p>
+                  <p className="text-xs font-bold text-[#2B4C6F] dark:text-slate-200">{user?.name}</p>
+                  <p className="text-[10px] font-mono text-slate-500 uppercase">{roleLabel}</p>
                 </div>
               </div>
 
@@ -517,10 +492,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
 
       {/* =========================================================================
           4. MOBILE LANDSCAPE VERTICAL ICON RAIL (max-lg:landscape)
-          - Automatically shifts bottom dock into a compact vertical floating icon rail on left edge (w-14)
+          - Solid Estate Navy (#1E3A5F) vertical rail
       ========================================================================= */}
       <aside 
-        className="fixed left-3 top-1/2 -translate-y-1/2 z-40 hidden max-lg:landscape:flex flex-col items-center w-14 py-3 rounded-2xl border border-[#E2E0D8] bg-white/90 dark:border-white/10 dark:bg-[#111827]/85 backdrop-blur-xl shadow-2xl gap-2 max-h-[92vh] overflow-y-auto"
+        className="fixed left-3 top-1/2 -translate-y-1/2 z-40 hidden max-lg:landscape:flex flex-col items-center w-14 py-3 rounded-2xl border border-[#2B4C6F]/50 bg-[#1E3A5F] text-[#FAF7F2] shadow-xl gap-2 max-h-[92vh] overflow-y-auto"
         aria-label="Navigasi Lanskap"
       >
         {filteredNavItems.map((item) => {
@@ -531,8 +506,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
               to={item.path}
               className={`min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl p-2 transition-all ${
                 isActive
-                  ? 'bg-blue-600 text-white dark:bg-sky-400 dark:text-slate-950 shadow-md font-semibold'
-                  : 'text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-sky-300 hover:bg-[#F4F3EF] dark:hover:bg-white/10'
+                  ? 'bg-white/20 text-[#F4B752] font-semibold'
+                  : 'text-[#FAF7F2]/75 hover:text-white hover:bg-white/10'
               }`}
               title={item.title}
             >
@@ -541,10 +516,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
           );
         })}
 
-        {/* QR Scanner trigger on Rail */}
         <button
           onClick={() => setIsQrScannerOpen(true)}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl p-2 text-[#10B981] hover:bg-emerald-50 dark:text-[#34D399] dark:hover:bg-emerald-950/50 cursor-pointer"
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl p-2 text-[#F4B752] hover:bg-white/10 cursor-pointer"
           title="Pindai QR"
           aria-label="Pindai QR"
         >
@@ -553,45 +527,38 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
       </aside>
 
       {/* =========================================================================
-          5. COMMAND CENTER SEARCH PALETTE (Ctrl+K Modal)
+          5. COMMAND SEARCH PALETTE MODAL (Ctrl+K)
       ========================================================================= */}
       {isSearchPaletteOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 sm:pt-24 p-4 animate-in fade-in duration-150">
           <div 
-            className="fixed inset-0 bg-[#090D16]/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
             onClick={() => setIsSearchPaletteOpen(false)}
           />
 
-          {/* Palette Dialog */}
-          <div className="relative w-full max-w-xl rounded-2xl border border-[#E2E0D8] bg-white p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#111827]/95 animate-in fade-in zoom-in-95 duration-150">
-            {/* Search Input */}
-            <div className="flex items-center gap-2.5 border-b border-[#E2E0D8] pb-3 dark:border-white/10">
-              <Search size={18} className="text-[#4F46E5] dark:text-[#6366F1]" />
+          <div className="relative w-full max-w-lg rounded-2xl border border-[#E6E1D6] bg-white p-3 shadow-2xl dark:border-slate-700 dark:bg-[#1A2433] z-10">
+            <div className="flex items-center gap-2.5 px-3 py-2 border-b border-[#E6E1D6] dark:border-slate-800">
+              <Search size={18} className="text-[#1E3A5F] dark:text-[#F4B752]" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Ketik tujuan navigasi atau perintah..."
-                className="w-full bg-transparent text-sm font-medium text-[#0F172A] outline-none placeholder:text-slate-400 dark:text-white"
+                placeholder="Ketik nama menu navigasi..."
+                className="w-full bg-transparent text-sm text-[#2B4C6F] dark:text-white placeholder:text-slate-400 outline-none"
                 autoFocus
               />
               <button 
                 onClick={() => setIsSearchPaletteOpen(false)}
-                className="min-h-[36px] min-w-[36px] flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="rounded-lg p-1 text-slate-400 hover:bg-[#FAF7F2] dark:hover:bg-slate-800"
               >
                 <X size={16} />
               </button>
             </div>
 
-            {/* Quick Actions & Navigation List */}
-            <div className="mt-3 max-h-72 overflow-y-auto space-y-1">
-              <p className="px-2 py-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400">
-                Tujuan Navigasi
-              </p>
+            <div className="py-2 max-h-72 overflow-y-auto space-y-1">
               {filteredSearchItems.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-400">
-                  Tidak ada tujuan navigasi yang sesuai dengan "{searchQuery}"
+                <div className="py-6 text-center text-xs text-slate-400">
+                  Tidak ditemukan menu yang sesuai.
                 </div>
               ) : (
                 filteredSearchItems.map((item) => (
@@ -601,43 +568,24 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                       navigate(item.path);
                       setIsSearchPaletteOpen(false);
                     }}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs text-[#0F172A] hover:bg-[#F4F3EF] dark:text-slate-300 dark:hover:bg-white/5 cursor-pointer"
+                    className="w-full flex items-center justify-between p-2.5 rounded-xl text-left hover:bg-[#FAF7F2] dark:hover:bg-[#111822] text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors"
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="text-slate-400">{React.cloneElement(item.icon, { size: 16 })}</div>
-                      <span className="font-semibold">{item.title}</span>
+                      <div className="text-[#1E3A5F] dark:text-[#F4B752]">
+                        {React.cloneElement(item.icon, { size: 16 })}
+                      </div>
+                      <span>{item.title}</span>
                     </div>
-                    <span className="font-mono text-[10px] text-slate-400">{item.category}</span>
+                    <span className="text-[10px] font-normal text-slate-400">{item.category}</span>
                   </button>
                 ))
               )}
-
-              {/* Quick Actions */}
-              <p className="mt-3 px-2 py-1 text-[10px] font-mono font-semibold uppercase tracking-wider text-slate-400 border-t border-[#E2E0D8] dark:border-white/10 pt-2">
-                Aksi Cepat
-              </p>
-              <button
-                onClick={() => {
-                  setIsSearchPaletteOpen(false);
-                  setIsQrScannerOpen(true);
-                }}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs text-[#10B981] hover:bg-emerald-50 dark:text-[#34D399] dark:hover:bg-emerald-950/40 cursor-pointer"
-              >
-                <QrCode size={16} />
-                <span className="font-semibold">Buka Pindai QR Aset</span>
-              </button>
-            </div>
-
-            {/* Footer Shortcut Info */}
-            <div className="mt-3 flex items-center justify-between border-t border-[#E2E0D8] pt-2 text-[10px] text-slate-400 dark:border-white/10 font-mono">
-              <span>Gunakan ESC untuk menutup</span>
-              <span className="text-[#10B981] dark:text-[#34D399]">Spatial Command Center</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Global QR Scanner Modal */}
+      {/* QR Scanner Modal Global */}
       <QrScannerModal
         isOpen={isQrScannerOpen}
         onClose={() => setIsQrScannerOpen(false)}

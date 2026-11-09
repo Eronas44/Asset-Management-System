@@ -202,20 +202,19 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
       />
 
       {/* Modal Dialog Card */}
-      <div className="relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-slate-900/95 animate-in zoom-in-95 duration-150">
+      <div className="relative z-10 flex w-full max-w-lg flex-col overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-xl dark:border-slate-800 dark:bg-[#1A2433] animate-in zoom-in-95 duration-150">
         
         {/* Header Modal */}
-        <div className="flex items-center justify-between border-b border-[#E2E0D8] px-5 py-4 dark:border-white/10">
+        <div className="flex items-center justify-between border-b border-[#E6E1D6] px-5 py-4 dark:border-slate-800 bg-[#FAF7F2]/60 dark:bg-[#151D2A]/60">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 dark:bg-sky-950/40 dark:border-sky-500/30 dark:text-sky-400 shadow-2xs">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#FAF7F2] text-[#1E3A5F] border border-[#E6E1D6] dark:bg-[#151D2A] dark:border-slate-700 dark:text-[#F4B752] shadow-2xs">
               <Camera size={18} />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[#2B4C6F] dark:text-[#FAF7F2] tracking-tight flex items-center gap-2">
                 <span>Pindai QR / Barcode Aset</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-mono font-bold text-emerald-700 dark:bg-emerald-950/60 dark:text-[#34D399]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  HUD ACTIVE
+                <span className="inline-flex items-center gap-1 rounded-full bg-[#F4B752] px-2 py-0.5 text-[9px] font-semibold text-slate-900">
+                  Kamera Aktif
                 </span>
               </h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400">
@@ -228,7 +227,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
               stopScanner();
               onClose();
             }}
-            className="min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer rounded-xl text-slate-400 hover:bg-[#F4F3EF] hover:text-[#0F172A] dark:hover:bg-white/10 dark:hover:text-white"
+            className="min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer rounded-xl text-slate-400 hover:bg-[#FAF7F2] hover:text-[#1E3A5F] dark:hover:bg-slate-800 dark:hover:text-white transition-colors"
           >
             <X size={18} />
           </button>
@@ -241,10 +240,10 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
           {scannedResult && (
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-50/60 p-4 dark:border-emerald-500/30 dark:bg-emerald-950/30">
               <div className="flex items-start gap-3">
-                <CheckCircle2 size={18} className="mt-0.5 text-[#10B981] dark:text-[#34D399] shrink-0" />
+                <CheckCircle2 size={18} className="mt-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <div className="space-y-1 w-full text-left">
                   <div className="flex items-center justify-between">
-                    <p className="text-xs font-bold text-emerald-900 dark:text-[#34D399]">
+                    <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
                       QR Berhasil Terdeteksi
                     </p>
                     <button
@@ -254,7 +253,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                       <RefreshCw size={12} /> Scan Ulang
                     </button>
                   </div>
-                  <p className="font-mono text-xs text-emerald-800 dark:text-emerald-200 break-all bg-white/80 dark:bg-slate-900/60 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/40">
+                  <p className="font-mono text-xs text-emerald-800 dark:text-emerald-200 break-all bg-white dark:bg-[#111822] px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/40">
                     {scannedResult}
                   </p>
                 </div>
@@ -263,14 +262,14 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
               {/* Status Pencarian Aset di Backend */}
               {isSearchingAsset && (
                 <div className="mt-3 flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400">
-                  <RefreshCw size={14} className="animate-spin text-blue-500" />
+                  <RefreshCw size={14} className="animate-spin text-[#1E3A5F] dark:text-[#F4B752]" />
                   Mencari rincian aset di inventaris...
                 </div>
               )}
 
               {/* Rincian Aset Ditemukan */}
               {detectedAsset && (
-                <div className="mt-4 rounded-2xl border border-[#E2E0D8] bg-white p-4 shadow-sm dark:border-white/10 dark:bg-slate-900">
+                <div className="mt-4 rounded-2xl border border-[#E6E1D6] bg-white p-4 shadow-xs dark:border-slate-800 dark:bg-[#111822]">
                   {borrowSuccessMessage && (
                     <div className="mb-3 flex items-start gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200 animate-in fade-in duration-200">
                       <CheckCircle2 size={16} className="mt-0.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
@@ -282,19 +281,19 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
 
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <span className="font-mono text-[10px] uppercase font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80 dark:bg-sky-950/40 dark:border-sky-800 dark:text-sky-400">
+                      <span className="font-mono text-[10px] uppercase font-bold text-[#1E3A5F] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#E6E1D6] dark:bg-[#1A2433] dark:border-slate-700 dark:text-[#F4B752]">
                         {detectedAsset.asset_code}
                       </span>
-                      <h4 className="text-xs font-bold text-[#0F172A] dark:text-white mt-1.5">
+                      <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2] mt-1.5">
                         {detectedAsset.name}
                       </h4>
                     </div>
-                    <span className="rounded-full border border-[#E2E0D8] bg-[#F4F3EF] px-2.5 py-0.5 text-[10px] font-semibold uppercase text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-200">
+                    <span className="rounded-full border border-[#E6E1D6] bg-[#FAF7F2] px-2.5 py-0.5 text-[10px] font-medium uppercase text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                       {detectedAsset.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 my-2 pt-2 border-t border-[#E2E0D8] dark:border-white/10">
+                  <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 my-2 pt-2 border-t border-[#E6E1D6] dark:border-slate-800">
                     <div>
                       <span className="block text-[10px] text-slate-400">Kategori:</span>
                       <span className="font-semibold text-slate-800 dark:text-slate-200">{detectedAsset.category?.name || '-'}</span>
@@ -306,14 +305,14 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                   </div>
 
                   {/* Tombol Tindakan Cepat */}
-                  <div className="mt-3 flex flex-wrap gap-2 pt-2 border-t border-[#E2E0D8] dark:border-white/10">
+                  <div className="mt-3 flex flex-wrap gap-2 pt-2 border-t border-[#E6E1D6] dark:border-slate-800">
                     <button
                       onClick={() => {
                         stopScanner();
                         onClose();
                         navigate(`/assets?search=${encodeURIComponent(detectedAsset.asset_code)}`);
                       }}
-                      className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl border border-blue-600 bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-blue-700 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300 transition-all"
+                      className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#1E3A5F] hover:bg-[#162D4A] px-3 py-1.5 text-xs font-semibold text-[#FAF7F2] shadow-xs dark:bg-[#1E3A5F] dark:hover:bg-[#25456f] transition-all"
                     >
                       <Monitor size={14} />
                       Lihat di Inventaris
@@ -336,7 +335,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                           onClose();
                           navigate('/borrowings');
                         }}
-                        className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-300 transition-colors"
+                        className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 dark:border-amber-700/50 dark:bg-amber-950/30 dark:text-amber-300 transition-colors"
                       >
                         Buku Sirkulasi
                         <ArrowRight size={14} />
@@ -348,7 +347,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                         href={`/public/assets/${detectedAsset.uuid}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="min-h-[38px] flex items-center gap-1 rounded-xl border border-[#E2E0D8] px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/10"
+                        className="min-h-[38px] flex items-center gap-1 rounded-xl border border-[#E6E1D6] px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
                         <ExternalLink size={14} />
                         Publik
@@ -368,48 +367,35 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
             </div>
           )}
 
-          {/* Area Kamera Pemindai dengan FUTURISTIC HUD VIEWFINDER OVERLAY */}
+          {/* Area Kamera Pemindai */}
           {!scannedResult && (
-            <div className="relative rounded-2xl overflow-hidden border border-[#E2E0D8] bg-slate-950 dark:border-white/10 shadow-inner">
+            <div className="relative rounded-2xl overflow-hidden border border-[#E6E1D6] bg-slate-900 dark:border-slate-800 shadow-inner">
               <div id={containerId} className="w-full min-h-[300px] flex items-center justify-center" />
               
-              {/* Futuristic HUD Viewfinder Overlay */}
+              {/* Clean Viewfinder Overlay */}
               {isScanning && (
                 <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                   
-                  {/* Top HUD Telemetry Ticker */}
+                  {/* Top Guide */}
                   <div className="absolute top-3 inset-x-0 flex justify-center">
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 border border-sky-500/40 backdrop-blur-md text-[10px] font-mono text-sky-300 shadow-[0_0_12px_rgba(56,189,248,0.25)]">
-                      <ScanLine size={12} className="animate-pulse text-sky-400" />
-                      <span>HUD VIEWFINDER // ALIGN TARGET QR</span>
+                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-white/10 backdrop-blur-sm text-[11px] text-[#FAF7F2]">
+                      <ScanLine size={13} className="text-[#F4B752]" />
+                      <span>Posisikan kode QR di dalam bingkai</span>
                     </div>
                   </div>
 
-                  {/* Viewfinder Target Frame with Glowing Cyan/Emerald Brackets & Laser */}
-                  <div className="relative h-56 w-56 rounded-2xl border border-sky-400/30 shadow-[0_0_0_9999px_rgba(9,13,22,0.65)] overflow-hidden">
-                    
-                    {/* Glowing Cyan/Emerald Corner Brackets */}
-                    <div className="absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2 border-sky-400 rounded-tl-lg shadow-[0_0_10px_#38BDF8]" />
-                    <div className="absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2 border-emerald-400 rounded-tr-lg shadow-[0_0_10px_#34D399]" />
-                    <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-emerald-400 rounded-bl-lg shadow-[0_0_10px_#34D399]" />
-                    <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-sky-400 rounded-br-lg shadow-[0_0_10px_#38BDF8]" />
-
-                    {/* Subtle Crosshairs Marker */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="h-4 w-4 relative">
-                        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-sky-400/40" />
-                        <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-sky-400/40" />
-                      </div>
-                    </div>
-
-                    {/* Animated Laser Scan Line */}
-                    <div className="absolute inset-x-3 h-0.5 bg-gradient-to-r from-transparent via-sky-400 to-transparent shadow-[0_0_12px_#38BDF8] animate-laser" />
+                  {/* Clean Viewfinder Target Frame with subtle corner borders */}
+                  <div className="relative h-56 w-56 rounded-2xl border border-white/20 shadow-[0_0_0_9999px_rgba(15,23,42,0.6)] overflow-hidden">
+                    <div className="absolute top-0 left-0 h-6 w-6 border-t-2 border-l-2 border-[#F4B752] rounded-tl-lg" />
+                    <div className="absolute top-0 right-0 h-6 w-6 border-t-2 border-r-2 border-[#F4B752] rounded-tr-lg" />
+                    <div className="absolute bottom-0 left-0 h-6 w-6 border-b-2 border-l-2 border-[#F4B752] rounded-bl-lg" />
+                    <div className="absolute bottom-0 right-0 h-6 w-6 border-b-2 border-r-2 border-[#F4B752] rounded-br-lg" />
                   </div>
 
-                  {/* Bottom Telemetry Guide */}
+                  {/* Bottom Guide */}
                   <div className="absolute bottom-3 inset-x-0 flex justify-center">
-                    <span className="text-[10px] font-mono text-slate-400 bg-slate-950/70 px-2.5 py-0.5 rounded-full border border-white/10">
-                      Auto-detect active
+                    <span className="text-[11px] text-slate-300 bg-slate-900/80 px-3 py-0.5 rounded-full border border-white/10">
+                      Pemindaian otomatis berjalan
                     </span>
                   </div>
                 </div>
@@ -438,9 +424,9 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
           )}
 
           {/* Opsi Fallback: Unggah Gambar QR */}
-          <div className="pt-2 border-t border-[#E2E0D8] dark:border-white/10">
-            <label className="flex items-center justify-center gap-2 w-full p-3 rounded-xl border border-dashed border-[#E2E0D8] hover:border-blue-500 bg-[#F4F3EF]/60 hover:bg-[#F4F3EF] dark:border-white/15 dark:bg-white/5 dark:hover:bg-white/10 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer transition-colors">
-              <UploadCloud size={16} className="text-blue-600 dark:text-sky-400" />
+          <div className="pt-2 border-t border-[#E6E1D6] dark:border-slate-800">
+            <label className="flex items-center justify-center gap-2 w-full p-3 rounded-xl border border-dashed border-[#E6E1D6] hover:border-[#1E3A5F] bg-[#FAF7F2]/60 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer transition-colors">
+              <UploadCloud size={16} className="text-[#1E3A5F] dark:text-[#F4B752]" />
               <span>Pindai dari File Gambar Barcode / Foto Galeri</span>
               <input
                 type="file"
@@ -454,14 +440,14 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
         </div>
 
         {/* Footer Modal */}
-        <div className="flex items-center justify-end border-t border-[#E2E0D8] px-5 py-3.5 bg-[#F4F3EF]/60 dark:border-white/10 dark:bg-slate-900/80">
+        <div className="flex items-center justify-end border-t border-[#E6E1D6] px-5 py-3.5 bg-[#FAF7F2]/60 dark:border-slate-800 dark:bg-[#151D2A]/60">
           <button
             type="button"
             onClick={() => {
               stopScanner();
               onClose();
             }}
-            className="min-h-[38px] cursor-pointer rounded-xl border border-[#E2E0D8] bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="min-h-[38px] cursor-pointer rounded-xl border border-[#E6E1D6] bg-white px-4 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
           >
             Tutup
           </button>

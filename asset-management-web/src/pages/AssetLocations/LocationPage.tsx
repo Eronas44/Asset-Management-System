@@ -139,16 +139,16 @@ const LocationPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 font-sans text-[#0F172A] dark:text-slate-100">
+    <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Header Section */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E2E0D8] pb-5 dark:border-white/10">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E6E1D6] pb-5 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A] dark:text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
               Lokasi & Fasilitas Penempatan
             </h1>
-            <span className="rounded-full border border-blue-500/30 bg-blue-50/80 px-2.5 py-0.5 font-mono text-[10px] font-bold text-blue-700 dark:border-sky-500/30 dark:bg-sky-950/50 dark:text-sky-300">
+            <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-xs font-semibold text-slate-900">
               Fasilitas Fisik
             </span>
           </div>
@@ -161,7 +161,7 @@ const LocationPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setIsCreateModalOpen(true)}
-          className="min-h-[44px] sm:min-h-[40px] inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-700 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+          className="min-h-[44px] sm:min-h-[40px] inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
         >
           <Plus size={16} strokeWidth={2.5} />
           <span>Tambah Lokasi</span>
@@ -184,16 +184,16 @@ const LocationPage: React.FC = () => {
       )}
 
       {/* Locations Bento Module Container */}
-      <div className="flex flex-col overflow-hidden rounded-3xl border border-[#E2E0D8] bg-white shadow-sm dark:border-white/10 dark:bg-[#111827]/80 dark:backdrop-blur-xl">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-xs dark:border-slate-800 dark:bg-[#1A2433]">
         
         {/* Filter & Search Toolbar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E2E0D8] p-4 dark:border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E1D6] p-4 dark:border-slate-800 bg-[#FAF7F2]/40 dark:bg-[#151D2A]/40">
           <div className="flex items-center gap-2.5">
-            <Building2 size={16} className="text-blue-600 dark:text-sky-400" />
-            <h2 className="text-xs font-bold uppercase tracking-wider text-[#0F172A] dark:text-slate-200">
+            <Building2 size={16} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
               Daftar Lokasi Aktif
             </h2>
-            <span className="rounded-full border border-[#E2E0D8] bg-[#F4F3EF] px-2.5 py-0.5 font-mono text-[10px] font-bold text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-300">
+            <span className="rounded-md border border-[#E6E1D6] bg-[#FAF7F2] px-2.5 py-0.5 font-mono text-[10px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300">
               {filteredLocations.length} Lokasi
             </span>
           </div>
@@ -207,7 +207,7 @@ const LocationPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari nama atau kode lokasi..."
-              className="w-full rounded-xl border border-[#E2E0D8] bg-[#F4F3EF]/60 py-1.5 pl-9 pr-3 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-white/5 dark:text-white dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 py-1.5 pl-9 pr-3 text-xs text-slate-800 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
         </div>
@@ -216,15 +216,15 @@ const LocationPage: React.FC = () => {
         <div>
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 dark:text-slate-500">
-              <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[#E2E0D8] border-t-blue-600 dark:border-slate-700 dark:border-t-sky-400" />
+              <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-[#E6E1D6] border-t-[#1E3A5F] dark:border-slate-700 dark:border-t-[#F4B752]" />
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Memuat data lokasi penempatan...</p>
             </div>
           ) : filteredLocations.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center p-4">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E2E0D8] bg-[#F4F3EF] text-slate-400 dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] text-slate-500 dark:border-slate-800 dark:bg-[#111822] dark:text-slate-400">
                 <MapPin size={22} />
               </div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#0F172A] dark:text-slate-200">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
                 Belum Ada Lokasi
               </h3>
               <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
@@ -233,10 +233,10 @@ const LocationPage: React.FC = () => {
             </div>
           ) : (
             <>
-              {/* DESKTOP TABLE VIEW (hidden md:table) with Dark Translucent Header & Floating Rows */}
+              {/* DESKTOP TABLE VIEW */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left text-xs text-slate-700 dark:text-slate-300">
-                  <thead className="border-b border-[#E2E0D8] bg-slate-100/90 text-[11px] font-bold uppercase tracking-wider text-slate-700 dark:border-b dark:border-slate-800 dark:bg-slate-900/90 dark:text-slate-300">
+                  <thead className="border-b border-[#E6E1D6] bg-[#F4F0EA] text-[11px] font-semibold uppercase tracking-wider text-[#2B4C6F] dark:border-b dark:border-slate-800 dark:bg-[#151D2A] dark:text-[#FAF7F2]">
                     <tr>
                       <th className="px-5 py-3.5 whitespace-nowrap w-20">ID</th>
                       <th className="px-5 py-3.5 whitespace-nowrap">Kode Lokasi</th>
@@ -246,19 +246,19 @@ const LocationPage: React.FC = () => {
                       <th className="px-5 py-3.5 text-right whitespace-nowrap">Aksi</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E2E0D8] dark:divide-white/10">
+                  <tbody className="divide-y divide-[#EFECE6] dark:divide-slate-800/80">
                     {filteredLocations.map((loc) => (
-                      <tr key={loc.id} className="hover:bg-slate-100/70 dark:hover:bg-indigo-950/30 transition-all">
+                      <tr key={loc.id} className="hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40 transition-colors">
                         <td className="whitespace-nowrap px-5 py-3.5 font-mono text-[11px] text-slate-400">
                           #{loc.id}
                         </td>
                         <td className="whitespace-nowrap px-5 py-3.5">
-                          <span className="font-mono text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/80 dark:bg-sky-950/40 dark:border-sky-800 dark:text-sky-300">
+                          <span className="font-mono text-[11px] font-bold text-[#1E3A5F] bg-[#FAF7F2] px-2.5 py-0.5 rounded-md border border-[#E6E1D6] dark:bg-[#111822] dark:border-slate-800 dark:text-[#F4B752]">
                             {loc.code}
                           </span>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className="font-bold text-[#0F172A] dark:text-white">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
                             {loc.name}
                           </span>
                         </td>
@@ -276,16 +276,16 @@ const LocationPage: React.FC = () => {
                               type="button"
                               onClick={() => handleOpenEdit(loc)}
                               title="Edit Lokasi"
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E0D8] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-[#F4F3EF] hover:border-blue-500 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
                             >
-                              <Pencil size={13} className="text-blue-600 dark:text-sky-400" />
+                              <Pencil size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                               <span>Edit</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => handleInitiateDelete(loc)}
                               title="Hapus Lokasi"
-                              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 shadow-2xs transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40 cursor-pointer"
+                              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 shadow-2xs transition hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/40 cursor-pointer"
                             >
                               <Trash2 size={13} className="text-rose-600 dark:text-rose-400" />
                               <span>Hapus</span>
@@ -298,19 +298,19 @@ const LocationPage: React.FC = () => {
                 </table>
               </div>
 
-              {/* MOBILE PORTRAIT CARD VIEW (< md) - Stacked Bento Cards */}
+              {/* MOBILE PORTRAIT CARD VIEW (< md) */}
               <div className="md:hidden space-y-3 p-4">
                 {filteredLocations.map((loc) => (
                   <div 
                     key={loc.id}
-                    className="rounded-2xl border border-[#E2E0D8] bg-white p-4 shadow-2xs dark:border-white/10 dark:bg-slate-900/70"
+                    className="rounded-2xl border border-[#E6E1D6] bg-white p-4 shadow-2xs dark:border-slate-800 dark:bg-[#151D2A]"
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <div>
-                        <span className="font-mono text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200/80 dark:bg-sky-950/40 dark:border-sky-800 dark:text-sky-300">
+                        <span className="font-mono text-[10px] font-bold text-[#1E3A5F] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#E6E1D6] dark:bg-[#111822] dark:border-slate-800 dark:text-[#F4B752]">
                           {loc.code}
                         </span>
-                        <h4 className="text-xs font-bold text-[#0F172A] dark:text-white mt-1.5">
+                        <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2] mt-1.5">
                           {loc.name}
                         </h4>
                       </div>
@@ -323,7 +323,7 @@ const LocationPage: React.FC = () => {
                       {loc.description || <span className="italic text-slate-400">Tidak ada deskripsi</span>}
                     </p>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-[#E2E0D8] dark:border-white/10">
+                    <div className="flex items-center justify-between pt-3 border-t border-[#E6E1D6] dark:border-slate-800">
                       <div className="flex items-center gap-1 font-mono text-[10px] text-slate-400">
                         <Calendar size={12} />
                         <span>
@@ -337,15 +337,15 @@ const LocationPage: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenEdit(loc)}
-                          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1 rounded-xl border border-[#E2E0D8] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-800 dark:text-slate-200"
+                          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200"
                         >
-                          <Pencil size={13} className="text-blue-600 dark:text-sky-400" />
+                          <Pencil size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
                           <span>Edit</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleInitiateDelete(loc)}
-                          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1 rounded-xl border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
+                          className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300"
                         >
                           <Trash2 size={13} className="text-rose-600 dark:text-rose-400" />
                           <span>Hapus</span>
@@ -379,7 +379,7 @@ const LocationPage: React.FC = () => {
               onChange={(e) => setCode(e.target.value)}
               required
               placeholder="Contoh: L1-SRV-01, GD-B-R204..."
-              className="w-full rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20 font-mono"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752] font-mono"
             />
           </div>
           <div>
@@ -392,7 +392,7 @@ const LocationPage: React.FC = () => {
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Contoh: Ruang Server Utama Lantai 1..."
-              className="w-full rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
           <div>
@@ -404,21 +404,21 @@ const LocationPage: React.FC = () => {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Keterangan akses keamanan, nomor gedung, atau penanggung jawab..."
               rows={3}
-              className="w-full resize-none rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="w-full resize-none rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E0D8] dark:border-white/10">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button
               type="button"
               onClick={() => setIsCreateModalOpen(false)}
-              className="min-h-[38px] rounded-xl border border-[#E2E0D8] bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="min-h-[38px] rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={submitLoading}
-              className="min-h-[38px] inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300 cursor-pointer"
+              className="min-h-[38px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f] cursor-pointer"
             >
               {submitLoading ? 'Menyimpan...' : <><CheckCircle2 size={14} /> Simpan Lokasi</>}
             </button>
@@ -444,7 +444,7 @@ const LocationPage: React.FC = () => {
               value={editCode}
               onChange={(e) => setEditCode(e.target.value)}
               required
-              className="w-full rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20 font-mono"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752] font-mono"
             />
           </div>
           <div>
@@ -456,7 +456,7 @@ const LocationPage: React.FC = () => {
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
               required
-              className="w-full rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
           <div>
@@ -467,21 +467,21 @@ const LocationPage: React.FC = () => {
               value={editDescription}
               onChange={(e) => setEditDescription(e.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs text-[#0F172A] placeholder:text-slate-400 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-500/20 dark:border-white/10 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400 dark:focus:ring-sky-400/20"
+              className="w-full resize-none rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
-          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E2E0D8] dark:border-white/10">
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button
               type="button"
               onClick={() => setIsEditModalOpen(false)}
-              className="min-h-[38px] rounded-xl border border-[#E2E0D8] bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="min-h-[38px] rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors cursor-pointer"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={submitLoading}
-              className="min-h-[38px] inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-blue-500/25 transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300 cursor-pointer"
+              className="min-h-[38px] inline-flex items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f] cursor-pointer"
             >
               {submitLoading ? 'Menyimpan...' : <><CheckCircle2 size={14} /> Perbarui Lokasi</>}
             </button>
