@@ -8,11 +8,13 @@ import {
   MapPin, 
   Tag, 
   RotateCcw,
-  AlertCircle
+  AlertCircle,
+  Layers,
+  CheckSquare,
+  Square
 } from 'lucide-react';
 import type { Asset, AssetStatus } from '../../types/asset';
 import { assetService } from '../../services/asset.service';
-import { useDebounce } from '../../utils/useDebounce';
 
 interface AssetPrintSelectionModalProps {
   isOpen: boolean;
@@ -56,60 +58,56 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
   initialAssets = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 300);
-
-  const [availableAssets, setAvailableAssets] = useState<Asset[]>(initialAssets);
+  const [allSystemAssets, setAllSystemAssets] = useState<Asset[]>(initialAssets);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Map ID -> Asset untuk menyimpan pilihan pengguna
   const [selectedMap, setSelectedMap] = useState<Map<number, Asset>>(new Map());
 
-  // Inisialisasi daftar aset saat modal dibuka
+  // Inisialisasi daftar seluruh aset saat modal dibuka
   useEffect(() => {
     if (isOpen) {
       setSearchTerm('');
       setErrorMessage(null);
-      // Gunakan initialAssets terlebih dahulu jika tersedia
-      if (initialAssets.length > 0) {
-        setAvailableAssets(initialAssets);
-      }
-      // Muat daftar aset terkini dari API
-      loadAssets('');
+      loadAllSystemAssets();
     } else {
       setSelectedMap(new Map());
     }
   }, [isOpen]);
 
-  // Efek pencarian dengan debounce
-  useEffect(() => {
-    if (!isOpen) return;
-    loadAssets(debouncedSearch);
-  }, [debouncedSearch]);
-
-  const loadAssets = async (searchQuery: string) => {
-    // Jika tidak ada query pencarian dan sudah ada initialAssets, langsung gunakan
-    if (!searchQuery.trim() && initialAssets.length > 0) {
-      setAvailableAssets(initialAssets);
-      setLoading(false);
-      return;
-    }
-
+  // Mengambil SELURUH aset yang terdaftar di sistem (bukan hanya 1 halaman)
+  const loadAllSystemAssets = async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const response = await assetService.getAll({
-        search: searchQuery.trim() || undefined,
-        per_page: 50
-      });
-      setAvailableAssets(response.data);
+      // Ambil hingga 1000 aset master dari database
+      const response = await assetService.getAll({ per_page: 1000 });
+      setAllSystemAssets(response.data);
     } catch (err) {
-      console.error('Gagal mengambil daftar aset untuk cetak:', err);
-      setErrorMessage('Gagal memuat daftar aset dari server.');
+      console.error('Gagal mengambil seluruh aset untuk cetak:', err);
+      if (initialAssets.length > 0) {
+        setAllSystemAssets(initialAssets);
+      } else {
+        setErrorMessage('Gagal memuat seluruh daftar aset dari server.');
+      }
     } finally {
       setLoading(false);
     }
   };
+
+  // Filter aset lokal secara instan berdasarkan kata kunci pencarian
+  const filteredAssets = useMemo(() => {
+    if (!searchTerm.trim()) return allSystemAssets;
+    const q = searchTerm.toLowerCase().trim();
+    return allSystemAssets.filter((a) => {
+      const matchName = a.name.toLowerCase().includes(q);
+      const matchCode = a.asset_code.toLowerCase().includes(q);
+      const matchCategory = a.category?.name ? a.category.name.toLowerCase().includes(q) : false;
+      const matchLocation = a.location?.name ? a.location.name.toLowerCase().includes(q) : false;
+      return matchName || matchCode || matchCategory || matchLocation;
+    });
+  }, [allSystemAssets, searchTerm]);
 
   // Toggle pilihan aset per item
   const handleToggleAsset = (asset: Asset) => {
@@ -124,19 +122,37 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     });
   };
 
-  // Toggle Pilih Semua pada daftar yang sedang ditampilkan
-  const isAllCurrentSelected = useMemo(() => {
-    if (availableAssets.length === 0) return false;
-    return availableAssets.every((a) => selectedMap.has(a.id));
-  }, [availableAssets, selectedMap]);
+  // Cek apakah seluruh aset di sistem sudah terpilih
+  const isAllSystemSelected = useMemo(() => {
+    if (allSystemAssets.length === 0) return false;
+    return allSystemAssets.every((a) => selectedMap.has(a.id));
+  }, [allSystemAssets, selectedMap]);
 
-  const handleToggleSelectAll = () => {
+  // Cek apakah seluruh aset yang sedang tampil (hasil pencarian) sudah terpilih
+  const isAllFilteredSelected = useMemo(() => {
+    if (filteredAssets.length === 0) return false;
+    return filteredAssets.every((a) => selectedMap.has(a.id));
+  }, [filteredAssets, selectedMap]);
+
+  // Pilih Semua Aset di Seluruh Sistem
+  const handleToggleSelectAllSystem = () => {
+    if (isAllSystemSelected) {
+      setSelectedMap(new Map());
+    } else {
+      const next = new Map<number, Asset>();
+      allSystemAssets.forEach((a) => next.set(a.id, a));
+      setSelectedMap(next);
+    }
+  };
+
+  // Pilih Semua Aset di Hasil Pencarian Saat Ini
+  const handleToggleSelectAllFiltered = () => {
     setSelectedMap((prev) => {
       const next = new Map(prev);
-      if (isAllCurrentSelected) {
-        availableAssets.forEach((a) => next.delete(a.id));
+      if (isAllFilteredSelected) {
+        filteredAssets.forEach((a) => next.delete(a.id));
       } else {
-        availableAssets.forEach((a) => next.set(a.id, a));
+        filteredAssets.forEach((a) => next.set(a.id, a));
       }
       return next;
     });
@@ -152,6 +168,10 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     onProceedToPrint(selectedList);
   };
 
+  // Estimasi jumlah lembar kertas A4
+  const estimatedSheets2Col = Math.ceil(selectedMap.size / 10);
+  const estimatedSheets3Col = Math.ceil(selectedMap.size / 18);
+
   if (!isOpen) return null;
 
   return (
@@ -165,10 +185,10 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
       />
 
       {/* Modal Dialog */}
-      <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-2xl dark:border-slate-800 dark:bg-[#1A2433] animate-in fade-in zoom-in-95 duration-150">
+      <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-2xl dark:border-slate-800 dark:bg-[#1A2433] animate-in fade-in zoom-in-95 duration-150">
         
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 border-b border-[#E6E1D6] bg-[#FAF7F2]/60 px-6 py-4.5 dark:border-slate-800 dark:bg-[#151D2A]/60">
+        <div className="flex items-start justify-between gap-4 border-b border-[#E6E1D6] bg-[#FAF7F2]/60 px-6 py-4 dark:border-slate-800 dark:bg-[#151D2A]/60">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
               <Printer size={18} />
@@ -179,13 +199,13 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
                   Pilih Aset untuk Cetak Label QR
                 </h3>
                 {selectedMap.size > 0 && (
-                  <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-[11px] font-bold text-slate-900">
+                  <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-[11px] font-bold text-slate-900 shadow-2xs">
                     {selectedMap.size} Terpilih
                   </span>
                 )}
               </div>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                Centang aset yang ingin dicetak lembar stikernya, lalu klik tombol Cetak di bawah.
+                Pilih aset dari seluruh sistem ({allSystemAssets.length} unit). Kertas dan PDF akan otomatis bertambah jika melebihi kapasitas stiker 1 lembar.
               </p>
             </div>
           </div>
@@ -225,27 +245,49 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
             )}
           </div>
 
-          {/* Baris Status Pilihan & Pilih Semua */}
+          {/* Baris Tombol Aksi Cepat */}
           <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-            <label className="inline-flex items-center gap-2 cursor-pointer select-none font-medium text-slate-700 dark:text-slate-300">
-              <input
-                type="checkbox"
-                checked={isAllCurrentSelected}
-                onChange={handleToggleSelectAll}
-                disabled={availableAssets.length === 0}
-                className="h-4 w-4 rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer disabled:cursor-not-allowed"
-              />
-              <span>
-                {isAllCurrentSelected ? 'Batalkan Pilih Semua di Hasil Ini' : 'Pilih Semua di Hasil Ini'}
-              </span>
-              <span className="text-slate-400">({availableAssets.length} unit)</span>
-            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Tombol Pilih Semua Aset di Sistem */}
+              <button
+                type="button"
+                onClick={handleToggleSelectAllSystem}
+                disabled={allSystemAssets.length === 0}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all shadow-2xs ${
+                  isAllSystemSelected
+                    ? 'border-[#1E3A5F] bg-[#1E3A5F] text-[#FAF7F2] dark:border-[#F4B752] dark:bg-[#F4B752] dark:text-slate-900'
+                    : 'border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] hover:border-[#1E3A5F] dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-200'
+                }`}
+              >
+                {isAllSystemSelected ? <CheckSquare size={14} /> : <Square size={14} />}
+                <span>
+                  {isAllSystemSelected 
+                    ? `Batalkan Semua Aset (${allSystemAssets.length})` 
+                    : `Pilih Semua Aset Sistem (${allSystemAssets.length})`}
+                </span>
+              </button>
+
+              {/* Tombol Pilih Semua Hasil Pencarian jika sedang memfilter */}
+              {searchTerm && filteredAssets.length > 0 && filteredAssets.length !== allSystemAssets.length && (
+                <button
+                  type="button"
+                  onClick={handleToggleSelectAllFiltered}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-200 text-xs font-medium"
+                >
+                  <span>
+                    {isAllFilteredSelected 
+                      ? 'Batal Pilih Hasil Filter' 
+                      : `Pilih Semua Hasil Pencarian (${filteredAssets.length})`}
+                  </span>
+                </button>
+              )}
+            </div>
 
             {selectedMap.size > 0 && (
               <button
                 type="button"
                 onClick={handleResetSelection}
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:text-rose-700 hover:underline dark:text-rose-400"
+                className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-600 hover:text-rose-700 hover:underline dark:text-rose-400 cursor-pointer"
               >
                 <RotateCcw size={12} />
                 <span>Reset Pilihan ({selectedMap.size})</span>
@@ -259,7 +301,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 dark:text-slate-500">
               <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A5F] dark:border-slate-700 dark:border-t-[#F4B752]" />
-              <p className="text-xs font-medium">Mencari data aset inventaris...</p>
+              <p className="text-xs font-medium">Memuat seluruh inventaris aset dari server...</p>
             </div>
           ) : errorMessage ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
@@ -267,13 +309,13 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
               <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">{errorMessage}</p>
               <button
                 type="button"
-                onClick={() => loadAssets(debouncedSearch)}
+                onClick={loadAllSystemAssets}
                 className="mt-3 rounded-lg border border-[#E6E1D6] bg-[#FAF7F2] px-3 py-1 text-xs text-slate-700 hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               >
                 Coba Lagi
               </button>
             </div>
-          ) : availableAssets.length === 0 ? (
+          ) : filteredAssets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-14 text-center">
               <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] text-slate-400 dark:border-slate-800 dark:bg-[#111822]">
                 <Package size={20} />
@@ -286,7 +328,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
               </p>
             </div>
           ) : (
-            availableAssets.map((asset) => {
+            filteredAssets.map((asset) => {
               const isChecked = selectedMap.has(asset.id);
               return (
                 <div
@@ -343,15 +385,30 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
           )}
         </div>
 
-        {/* Footer / Aksi Bawah */}
+        {/* Footer / Aksi Bawah & Estimasi Kertas */}
         <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3 border-t border-[#E6E1D6] bg-[#FAF7F2]/60 px-6 py-4 dark:border-slate-800 dark:bg-[#151D2A]/60">
-          <div className="text-xs text-slate-600 dark:text-slate-400">
+          <div>
             {selectedMap.size === 0 ? (
-              <span>Pilih minimal 1 aset untuk melanjutkan.</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">Pilih minimal 1 aset untuk melanjutkan ke pencetakan.</span>
             ) : (
-              <span>
-                Total <strong className="font-mono text-slate-900 dark:text-slate-100 font-bold">{selectedMap.size}</strong> aset siap dicetak label QR-nya.
-              </span>
+              <div className="space-y-0.5">
+                <div className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+                  Total <strong className="font-mono text-[#1E3A5F] dark:text-[#F4B752] font-bold">{selectedMap.size}</strong> aset dipilih dari {allSystemAssets.length} unit sistem.
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400">
+                  <Layers size={12} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                  <span>Otomatis dialokasikan menjadi: </span>
+                  <strong className="text-slate-800 dark:text-slate-200 font-mono">
+                    {estimatedSheets2Col} lembar A4
+                  </strong>
+                  <span className="text-slate-400">(2 kolom / 10 stiker)</span>
+                  <span>atau</span>
+                  <strong className="text-slate-800 dark:text-slate-200 font-mono">
+                    {estimatedSheets3Col} lembar A4
+                  </strong>
+                  <span className="text-slate-400">(3 kolom / 18 stiker)</span>
+                </div>
+              </div>
             )}
           </div>
 

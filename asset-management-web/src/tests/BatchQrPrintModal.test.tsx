@@ -105,4 +105,28 @@ describe('BatchQrPrintModal Unit Test', () => {
 
     expect(screen.queryByText(/Cetak & Unduh Label QR Aset Fisik/i)).not.toBeInTheDocument();
   });
+
+  it('otomatis merender lembar kedua jika jumlah aset melebihi kapasitas stiker 1 kertas', () => {
+    const handleClose = vi.fn();
+    // Buat 12 aset dummy untuk melebihi kapasitas 10 stiker per lembar (mode 2-kolom)
+    const twelveAssets: Asset[] = Array.from({ length: 12 }, (_, i) => ({
+      ...mockAssets[0],
+      id: i + 1,
+      asset_code: `AST-MULTI-${i + 1}`,
+      name: `Aset Multi Lembar ${i + 1}`
+    }));
+
+    renderWithProviders(
+      <BatchQrPrintModal
+        isOpen={true}
+        onClose={handleClose}
+        selectedAssets={twelveAssets}
+      />
+    );
+
+    // Verifikasi kedua lembar kertas A4 otomatis muncul di layar secara bersamaan
+    expect(screen.getByText(/LEMBAR KE-1 DARI 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/LEMBAR KE-2 DARI 2/i)).toBeInTheDocument();
+    expect(screen.getByText(/Otomatis 2 Lembar Kertas A4/i)).toBeInTheDocument();
+  });
 });

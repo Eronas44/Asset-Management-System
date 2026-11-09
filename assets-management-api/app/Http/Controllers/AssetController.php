@@ -39,14 +39,15 @@ class AssetController extends Controller
      * )
      */
     
-   /**
+    /**
      * Menampilkan daftar semua aset dengan filter dan pagination.
      */
     public function index(Request $request)
     {
-        // Mengambil query parameter dan menetapkan nilai default per_page = 10
+        // Mengambil query parameter dan menetapkan nilai per_page dinamis (mendukung 'all' atau hingga 1000)
         $filters = $request->only(['search', 'status', 'asset_category_id', 'asset_location_id']);
-        $perPage = $request->input('per_page', 10);
+        $perPageInput = $request->input('per_page', 10);
+        $perPage = ($perPageInput === 'all' || (int)$perPageInput <= 0) ? 1000 : min((int)$perPageInput, 1000);
     
         $assets = Asset::with(['category', 'location'])
             ->filter($filters)

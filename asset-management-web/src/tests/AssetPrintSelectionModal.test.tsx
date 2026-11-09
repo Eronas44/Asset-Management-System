@@ -121,4 +121,34 @@ describe('AssetPrintSelectionModal Unit Test', () => {
     expect(handleProceed).toHaveBeenCalledTimes(1);
     expect(handleProceed).toHaveBeenCalledWith([expect.objectContaining({ id: 101, asset_code: 'AST-TEST-001' })]);
   });
+
+  it('dapat memilih seluruh aset di sistem sekaligus dengan tombol Pilih Semua Aset Sistem', async () => {
+    const handleClose = vi.fn();
+    const handleProceed = vi.fn();
+
+    renderWithProviders(
+      <AssetPrintSelectionModal
+        isOpen={true}
+        onClose={handleClose}
+        onProceedToPrint={handleProceed}
+        initialAssets={mockAssets}
+      />
+    );
+
+    const selectAllBtn = await screen.findByRole('button', { name: /Pilih Semua Aset Sistem/i });
+    fireEvent.click(selectAllBtn);
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/2 Terpilih/i).length).toBeGreaterThan(0);
+    });
+
+    const proceedBtn = screen.getByRole('button', { name: /Cetak Label QR \(2\)/i });
+    fireEvent.click(proceedBtn);
+
+    expect(handleProceed).toHaveBeenCalledTimes(1);
+    expect(handleProceed).toHaveBeenCalledWith(expect.arrayContaining([
+      expect.objectContaining({ id: 101 }),
+      expect.objectContaining({ id: 102 }),
+    ]));
+  });
 });

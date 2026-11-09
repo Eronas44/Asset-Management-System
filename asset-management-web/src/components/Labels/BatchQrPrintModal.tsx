@@ -485,26 +485,36 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
             </div>
           </div>
 
-          {/* Tab Pemilihan Lembar (Bila Lebih dari 1 Halaman) */}
+          {/* Indikator Alokasi Halaman Otomatis (Bila Lebih dari 1 Lembar) */}
           {totalPages > 1 && (
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-800">
-              <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                <Layers size={13} />
-                Pilih Lembar Preview:
-              </span>
-              <div className="flex gap-1 overflow-x-auto">
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-[#1E3A5F] dark:text-[#F4B752] flex items-center gap-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-[#E6E1D6] dark:border-slate-700 shadow-2xs">
+                  <Layers size={13} />
+                  Otomatis {totalPages} Lembar Kertas A4
+                </span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
+                  (Seluruh lembar ditampilkan bertingkat di bawah & otomatis masuk ke dokumen PDF)
+                </span>
+              </div>
+              <div className="flex items-center gap-1 overflow-x-auto">
+                <span className="text-[10px] text-slate-400 font-medium mr-1">Lompat ke:</span>
                 {paginatedSheets.map((_, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    onClick={() => setActiveSheetTab(idx)}
-                    className={`px-3 py-1 rounded text-xs font-semibold cursor-pointer transition-all ${
+                    onClick={() => {
+                      const targetEl = document.getElementById(`sheet-wrapper-${idx}`);
+                      targetEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                      setActiveSheetTab(idx);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                       activeSheetTab === idx
-                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                        ? 'bg-[#1E3A5F] text-[#FAF7F2] border-[#1E3A5F] dark:bg-[#F4B752] dark:text-slate-900'
+                        : 'bg-white text-slate-700 border-[#E6E1D6] hover:bg-[#FAF7F2] hover:border-[#1E3A5F] dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
                     }`}
                   >
-                    Lembar {idx + 1} ({paginatedSheets[idx].length} stiker)
+                    Kertas #{idx + 1} ({paginatedSheets[idx].length})
                   </button>
                 ))}
               </div>
@@ -515,24 +525,38 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
         {/* Sheet Preview & Printable Area (Wysiwyg A4 View) */}
         <div 
           ref={printSheetsContainerRef}
-          className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-200/60 dark:bg-slate-950/80 flex flex-col items-center gap-6 print:p-0 print:bg-white print:overflow-visible"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-200/60 dark:bg-slate-950/80 flex flex-col items-center gap-8 print:p-0 print:bg-white print:overflow-visible"
         >
           {paginatedSheets.map((pageAssets, pageIdx) => {
-            const isVisibleOnScreen = totalPages <= 1 || activeSheetTab === pageIdx;
-
             return (
-              <div
-                key={pageIdx}
-                id={`printable-a4-sheet-${pageIdx}`}
-                className={`w-[794px] min-h-[1123px] max-h-[1123px] bg-white text-slate-900 p-8 shadow-xl rounded-md border border-slate-300 relative flex flex-col justify-between box-border print:shadow-none print:border-none print:p-6 print:w-full print:max-h-none print:block print:page-break-after-always ${
-                  isVisibleOnScreen ? 'block' : 'hidden'
-                }`}
-                style={{
-                  width: '794px',
-                  minHeight: '1123px',
-                  boxSizing: 'border-box',
-                }}
-              >
+              <div key={pageIdx} id={`sheet-wrapper-${pageIdx}`} className="flex flex-col items-center gap-2 w-full max-w-[794px]">
+                {/* Header Penanda Kertas A4 (Muncul jika lebih dari 1 kertas) */}
+                <div className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-2xs backdrop-blur-xs print:hidden">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-bold text-[#1E3A5F] dark:text-[#F4B752]">
+                      KERTAS A4 LEMBAR KE-{pageIdx + 1} DARI {totalPages}
+                    </span>
+                    <span className="text-slate-300 dark:text-slate-700">|</span>
+                    <span className="text-slate-500 dark:text-slate-400 font-normal text-[11px]">
+                      {pageAssets.length} Stiker ({layoutColumns === '2' ? 'Format 2 Kolom' : 'Format 3 Kolom'})
+                    </span>
+                  </div>
+                  <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                    Stiker #{pageIdx * itemsPerPage + 1} - #{pageIdx * itemsPerPage + pageAssets.length}
+                  </span>
+                </div>
+
+                {/* Kontainer Lembar Kertas Fisik A4 */}
+                <div
+                  id={`printable-a4-sheet-${pageIdx}`}
+                  className="w-[794px] min-h-[1123px] max-h-[1123px] bg-white text-slate-900 p-8 shadow-xl rounded-md border border-slate-300 relative flex flex-col justify-between box-border mb-4 print:mb-0 print:shadow-none print:border-none print:p-6 print:w-full print:max-h-none print:block print:page-break-after-always"
+                  style={{
+                    width: '794px',
+                    minHeight: '1123px',
+                    boxSizing: 'border-box',
+                  }}
+                >
                 {/* Header Lembar A4 */}
                 <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-4">
                   <div className="flex items-center gap-2">
@@ -651,6 +675,7 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
                   <span>STANDAR UKURAN KERTAS A4 (210 &times; 297 mm)</span>
                 </div>
               </div>
+            </div>
             );
           })}
         </div>
