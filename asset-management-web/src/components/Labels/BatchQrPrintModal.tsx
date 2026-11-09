@@ -295,20 +295,20 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
       </div>
 
       {/* Container Utama Modal */}
-      <div className="relative flex w-full max-w-6xl max-h-[96vh] flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none">
+      <div className="relative flex w-full max-w-6xl max-h-[96vh] flex-col overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white/95 backdrop-blur-2xl shadow-2xl dark:border-white/10 dark:bg-slate-900/95 print:border-none print:shadow-none print:w-full print:max-w-none print:max-h-none">
         
         {/* Header Modal */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 px-6 py-3.5 dark:border-slate-800 print:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E2E0D8] px-6 py-3.5 dark:border-white/10 print:hidden">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-950/40 dark:text-indigo-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-200/60 dark:bg-sky-950/40 dark:border-sky-500/30 dark:text-sky-400 shadow-2xs">
               <FileDown size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                <h2 className="text-sm font-bold text-[#0F172A] dark:text-slate-100">
                   Cetak & Unduh Label QR Aset Fisik
                 </h2>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/50 dark:text-[#34D399] border border-emerald-200 dark:border-emerald-800">
                   <CheckCircle2 size={10} /> Diproses Langsung dari Web
                 </span>
               </div>
@@ -324,7 +324,7 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => handleGeneratePdf('preview')}
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="flex cursor-pointer items-center gap-1.5 rounded-xl border border-[#E2E0D8] bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-[#F4F3EF] disabled:opacity-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               title="Buka tampilan PDF di tab baru"
             >
               <ExternalLink size={14} />
@@ -335,7 +335,7 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => handleGeneratePdf('download')}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 active:scale-98 transition-all disabled:opacity-50 dark:border-indigo-500 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+              className="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 active:scale-98 transition-all disabled:opacity-50 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
             >
               {isProcessing ? (
                 <>
@@ -378,8 +378,8 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
         )}
 
         {isProcessing && (
-          <div className="flex items-center gap-3 bg-indigo-50 px-6 py-2 text-xs text-indigo-900 border-b border-indigo-100 dark:bg-indigo-950/40 dark:border-indigo-900 dark:text-indigo-200 print:hidden">
-            <Loader2 size={14} className="animate-spin text-indigo-600 dark:text-indigo-400" />
+          <div className="flex items-center gap-3 bg-blue-50 px-6 py-2 text-xs text-blue-900 border-b border-blue-100 dark:bg-sky-950/40 dark:border-sky-900 dark:text-sky-200 print:hidden">
+            <Loader2 size={14} className="animate-spin text-blue-600 dark:text-sky-400" />
             <span className="font-medium">{processingStatus}</span>
           </div>
         )}
@@ -397,7 +397,7 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="PT. EROAS ASSET MANAGEMENT"
-                className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-800 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="w-full rounded-xl border border-[#E2E0D8] bg-white px-3 py-1.5 text-xs text-[#0F172A] focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:outline-none dark:border-white/10 dark:bg-slate-800 dark:text-slate-200"
               />
             </div>
 
@@ -413,10 +413,10 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
                     setLayoutColumns('2');
                     setActiveSheetTab(0);
                   }}
-                  className={`flex-1 py-1.5 px-2 rounded-md border text-xs font-semibold cursor-pointer transition-all ${
+                  className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
                     layoutColumns === '2'
                       ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border-[#E2E0D8] bg-white text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-800 dark:text-slate-300'
                   }`}
                 >
                   2 Kolom (10/Hal)
@@ -427,10 +427,10 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
                     setLayoutColumns('3');
                     setActiveSheetTab(0);
                   }}
-                  className={`flex-1 py-1.5 px-2 rounded-md border text-xs font-semibold cursor-pointer transition-all ${
+                  className={`flex-1 py-1.5 px-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
                     layoutColumns === '3'
                       ? 'border-indigo-600 bg-indigo-600 text-white shadow-xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      : 'border-[#E2E0D8] bg-white text-slate-700 hover:bg-[#F4F3EF] dark:border-white/10 dark:bg-slate-800 dark:text-slate-300'
                   }`}
                 >
                   3 Kolom (18/Hal)
@@ -688,7 +688,7 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
               type="button"
               disabled={isProcessing}
               onClick={() => handleGeneratePdf('download')}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-indigo-600 bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-indigo-700 active:scale-98 transition-all disabled:opacity-50 dark:border-indigo-500 dark:bg-indigo-600 dark:hover:bg-indigo-500"
+              className="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-md shadow-blue-500/25 hover:bg-blue-700 active:scale-98 transition-all disabled:opacity-50 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
             >
               {isProcessing ? (
                 <>

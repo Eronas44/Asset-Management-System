@@ -4,7 +4,7 @@ import type { UserData } from '../../types/user';
 import { LoadingIndicator } from '../../components/Feedback/LoadingIndicator';
 import { ErrorMessage } from '../../components/Feedback/ErrorMessage';
 import { extractErrorMessage } from '../../utils/error';
-import { ChevronLeft, ChevronRight, Plus, ShieldCheck, UserCheck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ShieldCheck, UserCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Feedback/ToastContext';
@@ -120,7 +120,7 @@ const UserPage: React.FC = () => {
       return 'border-slate-800 bg-slate-900 text-white dark:border-slate-200 dark:bg-slate-100 dark:text-slate-950';
     }
     if (primary === 'admin') {
-      return 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-300';
+      return 'border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300';
     }
     return 'border-slate-200 bg-slate-100 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300';
   };
@@ -128,53 +128,111 @@ const UserPage: React.FC = () => {
   if (loading && users.length === 0) return <LoadingIndicator message="Memuat direktori pengguna..." />;
 
   return (
-    <div className="space-y-6">
-      {/* Top Header Card */}
-      <div className="rounded-lg border border-slate-200/90 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Manajemen Pengguna
-              </h1>
-              <span className="rounded border border-slate-200 bg-slate-50 px-2 py-0.5 font-mono text-xs text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                {users.length} Akun Aktif
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              Pengelolaan kredensial login, registrasi personel, dan pembagian tingkat wewenang sistem.
-            </p>
+    <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
+      
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E2E0D8] pb-5 dark:border-white/10">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Manajemen Pengguna
+            </h1>
+            <span className="rounded-md border border-[#E2E0D8] bg-white/70 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:bg-slate-800/70 dark:text-slate-300">
+              {users.length} Akun Aktif
+            </span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-slate-900 px-3.5 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
-          >
-            <Plus size={14} />
-            Tambah Pengguna
-          </button>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Pengelolaan kredensial login, registrasi personel, dan pembagian tingkat wewenang sistem.
+          </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setIsCreateModalOpen(true)}
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
+        >
+          <Plus size={16} strokeWidth={2.5} />
+          <span>Tambah Pengguna</span>
+        </button>
       </div>
 
       {errorDetails && <ErrorMessage message={errorDetails.message} traceId={errorDetails.traceId} />}
       {message && (
         <div
-          className={`rounded border px-4 py-3 text-xs font-medium ${
+          className={`flex items-start gap-3 rounded-xl border p-4 text-xs transition-all ${
             message.isError
-              ? 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300'
-              : 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300'
+              ? 'border-rose-500/30 bg-rose-50/80 text-rose-900 dark:border-rose-500/25 dark:bg-rose-950/30 dark:text-rose-200'
+              : 'border-emerald-500/30 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/25 dark:bg-emerald-950/30 dark:text-emerald-200'
           }`}
         >
-          {message.text}
+          <div className="mt-0.5 shrink-0">
+            {message.isError ? <AlertCircle size={15} /> : <CheckCircle2 size={15} />}
+          </div>
+          <p className="leading-relaxed font-medium">{message.text}</p>
         </div>
       )}
 
-      {/* Users Table */}
-      <div className="overflow-hidden rounded-lg border border-slate-200/90 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="overflow-x-auto">
+      {/* Users Table / Bento Card Container */}
+      <div className="overflow-hidden rounded-2xl border border-[#E2E0D8] bg-white dark:border-white/10 dark:bg-slate-900/70 shadow-xs backdrop-blur-md">
+        
+        {/* Mobile View: Thumb-friendly Stacked Bento Cards */}
+        <div className="md:hidden space-y-3 p-4">
+          {users.map((u) => {
+            const isCurrent = currentUser?.id === u.id;
+            return (
+              <div key={u.id} className="rounded-xl border border-[#E2E0D8] bg-white p-4 dark:border-white/10 dark:bg-slate-850/70 shadow-2xs space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 font-mono text-xs font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+                      {u.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-xs text-slate-900 dark:text-white">{u.name}</span>
+                        {isCurrent && (
+                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-mono text-blue-700 dark:bg-sky-950 dark:text-sky-300">
+                            Anda
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">{u.email}</span>
+                    </div>
+                  </div>
+                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-mono font-semibold uppercase tracking-wide ${getRoleBadge(u.roles)}`}>
+                    <ShieldCheck size={11} />
+                    {u.roles.join(', ') || 'No Role'}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800 text-[11px]">
+                  <span className="text-slate-400 font-mono">
+                    {new Date(u.created_at).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </span>
+                  <select
+                    value={u.roles[0] || 'staff'}
+                    onChange={(e) => initiateRoleChange(u.id, e.target.value, u.name)}
+                    disabled={isCurrent}
+                    title={isCurrent ? 'Anda tidak dapat mengubah peran akun Anda sendiri' : 'Ubah wewenang pengguna'}
+                    className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-xs text-slate-700 shadow-2xs outline-none transition-all focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-400"
+                  >
+                    <option value="staff">Staff</option>
+                    <option value="admin">Admin</option>
+                    <option value="superuser">Superuser</option>
+                  </select>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop View: Ledger Table */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="min-w-full divide-y divide-slate-200 text-left text-xs dark:divide-slate-800">
-            <thead className="bg-slate-50 text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+            <thead className="bg-slate-100/90 text-slate-700 border-b border-slate-200/90 text-[11px] font-semibold uppercase tracking-wider dark:bg-slate-900/90 dark:text-slate-300 dark:border-b dark:border-slate-800">
               <tr>
                 <th className="px-5 py-3 font-semibold uppercase tracking-wider text-[11px]">Nama & Identitas</th>
                 <th className="px-5 py-3 font-semibold uppercase tracking-wider text-[11px]">Email Akses</th>
@@ -183,20 +241,20 @@ const UserPage: React.FC = () => {
                 <th className="px-5 py-3 text-right font-semibold uppercase tracking-wider text-[11px]">Aksi Penugasan</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-800/80 dark:bg-slate-900">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
               {users.map((u) => {
                 const isCurrent = currentUser?.id === u.id;
                 return (
-                  <tr key={u.id} className="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                  <tr key={u.id} className="transition-all hover:bg-slate-100/70 dark:hover:bg-indigo-950/30">
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-7 w-7 items-center justify-center rounded border border-slate-200 bg-slate-50 font-mono text-[11px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 font-mono text-[11px] font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
                           {u.name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
                           <span className="font-semibold text-slate-900 dark:text-white">{u.name}</span>
                           {isCurrent && (
-                            <span className="ml-2 rounded border border-slate-200 bg-slate-100 px-1.5 py-0.2 text-[10px] font-mono text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+                            <span className="ml-2 rounded-md border border-blue-200/80 bg-blue-50 px-1.5 py-0.5 text-[10px] font-mono text-blue-700 dark:border-sky-800/50 dark:bg-sky-950/40 dark:text-sky-300">
                               Akun Anda
                             </span>
                           )}
@@ -205,7 +263,7 @@ const UserPage: React.FC = () => {
                     </td>
                     <td className="px-5 py-3.5 font-mono text-slate-600 dark:text-slate-300">{u.email}</td>
                     <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wide ${getRoleBadge(u.roles)}`}>
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wide ${getRoleBadge(u.roles)}`}>
                         <ShieldCheck size={11} />
                         {u.roles.join(', ') || 'No Role'}
                       </span>
@@ -223,7 +281,7 @@ const UserPage: React.FC = () => {
                         onChange={(e) => initiateRoleChange(u.id, e.target.value, u.name)}
                         disabled={isCurrent}
                         title={isCurrent ? 'Anda tidak dapat mengubah peran akun Anda sendiri' : 'Ubah wewenang pengguna'}
-                        className="rounded border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 shadow-2xs outline-none transition focus:border-slate-400 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-slate-600"
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 shadow-2xs outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:focus:border-sky-400"
                       >
                         <option value="staff">Staff</option>
                         <option value="admin">Admin</option>
@@ -238,7 +296,7 @@ const UserPage: React.FC = () => {
         </div>
 
         {/* Pagination Bar */}
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/50 sm:flex-row">
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-[#E2E0D8] bg-slate-50/50 px-5 py-3 dark:border-slate-800 dark:bg-slate-900/50 sm:flex-row">
           <span className="text-xs text-slate-500 dark:text-slate-400">
             Halaman <span className="font-mono font-semibold text-slate-900 dark:text-white">{currentPage}</span> dari <span className="font-mono font-semibold text-slate-900 dark:text-white">{lastPage}</span>
           </span>
@@ -247,7 +305,7 @@ const UserPage: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="inline-flex items-center gap-1 rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <ChevronLeft size={13} /> Sebelumnya
             </button>
@@ -255,7 +313,7 @@ const UserPage: React.FC = () => {
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, lastPage))}
               disabled={currentPage === lastPage}
-              className="inline-flex items-center gap-1 rounded border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-2xs transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               Berikutnya <ChevronRight size={13} />
             </button>
@@ -273,7 +331,7 @@ const UserPage: React.FC = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Nama Lengkap <span className="text-rose-500">*</span>
             </label>
             <input
@@ -281,12 +339,12 @@ const UserPage: React.FC = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full rounded border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-slate-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Alamat Email <span className="text-rose-500">*</span>
             </label>
             <input
@@ -294,12 +352,12 @@ const UserPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-slate-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Kata Sandi <span className="text-rose-500">*</span>
             </label>
             <input
@@ -307,18 +365,18 @@ const UserPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-slate-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-medium text-slate-700 dark:text-slate-300">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Peran Utama <span className="text-rose-500">*</span>
             </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="w-full rounded border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition focus:border-slate-400 focus:bg-white dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-slate-600"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-sky-400"
             >
               <option value="staff">Staff (Operasional Standar)</option>
               <option value="admin">Admin (Manajemen Data & Aset)</option>
@@ -330,9 +388,9 @@ const UserPage: React.FC = () => {
             <button
               type="submit"
               disabled={submitLoading}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-slate-900 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-xs transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white shadow-sm transition-all hover:bg-blue-700 active:scale-95 focus:ring-2 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-sky-400 dark:text-slate-950 dark:hover:bg-sky-300"
             >
-              {submitLoading ? 'Memproses...' : <><UserCheck size={14} /> Daftarkan Pengguna</>}
+              {submitLoading ? 'Memproses...' : <><UserCheck size={16} /> Daftarkan Pengguna</>}
             </button>
           </div>
         </form>

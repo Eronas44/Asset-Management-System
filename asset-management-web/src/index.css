@@ -2,20 +2,83 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-warm-alabaster: #F4F3EF;
+  --color-deep-obsidian: #090D16;
+  --color-deep-slate: #0F172A;
+  --color-alabaster-card: #FFFFFF;
+  --color-alabaster-border: #E2E0D8;
+  --color-electric-blue: #2563EB;
+  --color-sky-cyan: #38BDF8;
+  --color-emerald-accent: #10B981;
+  --color-cyber-mint: #34D399;
+  --color-amber-accent: #F59E0B;
+  --color-rose-accent: #F43F5E;
+}
+
 @layer base {
-	html {
-		color-scheme: light;
-	}
+  :root {
+    --bg-primary: #F4F3EF;
+    --text-primary: #0F172A;
+    --card-bg: #FFFFFF;
+    --card-border: #E2E0D8;
+    color-scheme: light;
+  }
 
-	html.dark {
-		color-scheme: dark;
-	}
+  html.dark {
+    --bg-primary: #090D16;
+    --text-primary: #F8FAFC;
+    --card-bg: rgba(17, 24, 39, 0.8);
+    --card-border: rgba(255, 255, 255, 0.1);
+    color-scheme: dark;
+  }
 
-	body {
-		@apply bg-slate-50 text-slate-900 antialiased transition-colors duration-300;
-	}
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply antialiased transition-colors duration-300;
+  }
+}
 
-	html.dark body {
-		@apply bg-slate-950 text-slate-100;
-	}
+/* Glassmorphic Bento utilities */
+.bento-card-light {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E0D8;
+}
+
+.bento-card-dark {
+  background-color: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Futuristic HUD Laser Animation for Scanner */
+@keyframes laserScan {
+  0% {
+    top: 0%;
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 98%;
+    opacity: 0.8;
+  }
+}
+
+.animate-laser {
+  animation: laserScan 2s ease-in-out infinite alternate;
+}
+
+/* Landscape mobile helpers */
+@media (orientation: landscape) and (max-width: 1023px) {
+  .landscape-condensed-hud {
+    height: 3rem !important;
+  }
+  .landscape-content-pad {
+    padding-left: 5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
 }
