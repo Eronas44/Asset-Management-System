@@ -159,6 +159,9 @@ class Asset extends Model
                 $q->where('name', 'like', '%' . $search . '%')
                   ->orWhere('asset_code', 'like', '%' . $search . '%')
                   ->orWhere('uuid', 'like', '%' . $search . '%');
+                if (is_numeric($search)) {
+                    $q->orWhere('id', (int) $search);
+                }
             });
         });
 
@@ -214,7 +217,12 @@ public function getCurrentBookValueAttribute(): float
     $purchaseDate = Carbon::parse($this->purchase_date);
     $currentDate = Carbon::now();
     
-    // Perbaikan: Gunakan diffInMonths untuk menghitung selisih bulan secara aman
+    // Jika tanggal perolehan di masa depan, nilai buku utuh sesuai harga beli
+    if ($purchaseDate->isFuture() || $purchaseDate > $currentDate) {
+        return (float) $this->purchase_price;
+    }
+
+    // Gunakan diffInMonths untuk menghitung selisih bulan secara aman
     $monthsPassed = $purchaseDate->diffInMonths($currentDate);
     
     if ($monthsPassed <= 0) {

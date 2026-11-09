@@ -98,7 +98,11 @@ class AssetBorrowingController extends Controller
                 ]);
             }
 
-            ActivityLogger::log('borrow_asset', "Memproses peminjaman aset {$asset->name} oleh {$borrow->borrower_name}", $borrow);
+            ActivityLogger::log('borrow_asset', "Memproses peminjaman aset {$asset->name} oleh {$borrow->borrower_name}", $asset, [
+                'borrowing_id' => $borrow->id,
+                'borrower_name' => $borrow->borrower_name,
+                'expected_return_at' => (string) $borrow->expected_return_at,
+            ]);
             return $borrow;
         });
 
@@ -166,7 +170,12 @@ class AssetBorrowingController extends Controller
                 }
             }
 
-            ActivityLogger::log('return_asset', "Memproses pengembalian aset {$borrowing->asset?->name} oleh {$borrowing->borrower_name}", $borrowing);
+            $targetAsset = $borrowing->asset ?? ($borrowing->asset_id ? Asset::withTrashed()->find($borrowing->asset_id) : null);
+            ActivityLogger::log('return_asset', "Memproses pengembalian aset " . ($targetAsset?->name ?? 'Aset') . " oleh {$borrowing->borrower_name}", $targetAsset, [
+                'borrowing_id' => $borrowing->id,
+                'borrower_name' => $borrowing->borrower_name,
+                'returned_at' => (string) $returnedAt,
+            ]);
 
             return $borrowing;
         });

@@ -71,6 +71,12 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
       const publicUrlMatch = decodedText.match(/public\/assets\/([a-zA-Z0-9-_]+)/);
       if (publicUrlMatch) {
         lookupQuery = publicUrlMatch[1];
+      } else {
+        // 3. Cek jika format URL internal /assets/{id}
+        const assetUrlMatch = decodedText.match(/\/assets\/([0-9]+)/);
+        if (assetUrlMatch) {
+          lookupQuery = assetUrlMatch[1];
+        }
       }
     }
 
@@ -310,19 +316,20 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                       onClick={() => {
                         stopScanner();
                         onClose();
-                        navigate(`/assets?search=${encodeURIComponent(detectedAsset.asset_code)}`);
+                        navigate(`/assets/${detectedAsset.id}`);
                       }}
-                      className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#1E3A5F] hover:bg-[#162D4A] px-3 py-1.5 text-xs font-semibold text-[#FAF7F2] shadow-xs dark:bg-[#1E3A5F] dark:hover:bg-[#25456f] transition-all"
+                      className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl bg-[#1E3A5F] hover:bg-[#162D4A] px-3.5 py-1.5 text-xs font-semibold text-[#FAF7F2] shadow-xs transition-all"
+                      title="Buka rincian lengkap Digital Passport aset ini"
                     >
                       <Monitor size={14} />
-                      Lihat di Inventaris
+                      Detail Passport
                       <ArrowRight size={14} />
                     </button>
 
                     {(detectedAsset.status === 'tersedia' || detectedAsset.status === 'available') && (
                       <button
                         onClick={() => setIsBorrowModalOpen(true)}
-                        className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl border border-emerald-600 bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition-colors"
+                        className="min-h-[38px] flex cursor-pointer items-center gap-1.5 rounded-xl border border-emerald-600 bg-emerald-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-emerald-700 transition-colors"
                       >
                         Pinjamkan Aset
                       </button>

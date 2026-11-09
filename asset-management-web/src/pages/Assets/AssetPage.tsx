@@ -261,9 +261,10 @@ const AssetPage: React.FC = () => {
     try {
       const data = await assetService.exportCsv(filters);
       triggerDownload(data, 'csv');
+      toast.success('Laporan inventaris CSV berhasil diunduh.');
     } catch (err) {
       console.error('Gagal mengekspor CSV:', err);
-      alert('Gagal mengunduh laporan CSV.');
+      toast.error('Gagal mengunduh laporan CSV.');
     } finally {
       setExportLoading((prev) => ({ ...prev, csv: false }));
     }
@@ -274,9 +275,10 @@ const AssetPage: React.FC = () => {
     try {
       const data = await assetService.exportPdf(filters);
       triggerDownload(data, 'pdf');
+      toast.success('Laporan inventaris PDF berhasil diunduh.');
     } catch (err) {
       console.error('Gagal mengekspor PDF:', err);
-      alert('Gagal mengunduh laporan PDF.');
+      toast.error('Gagal mengunduh laporan PDF.');
     } finally {
       setExportLoading((prev) => ({ ...prev, pdf: false }));
     }
@@ -287,7 +289,16 @@ const AssetPage: React.FC = () => {
     setMessage(null);
 
     if (!categoryId || !locationId) {
-      setMessage({ text: 'Kategori dan Lokasi wajib dipilih.', isError: true });
+      const errMsg = 'Kategori dan Lokasi wajib dipilih.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
+      return;
+    }
+
+    if (Number(residualValue) > Number(purchasePrice)) {
+      const errMsg = 'Nilai residu tidak boleh lebih besar dari harga perolehan.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
       return;
     }
 
@@ -382,7 +393,16 @@ const AssetPage: React.FC = () => {
     setMessage(null);
 
     if (!editCategoryId || !editLocationId) {
-      setMessage({ text: 'Kategori dan Lokasi wajib dipilih.', isError: true });
+      const errMsg = 'Kategori dan Lokasi wajib dipilih.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
+      return;
+    }
+
+    if (Number(editResidualValue) > Number(editPurchasePrice)) {
+      const errMsg = 'Nilai residu tidak boleh lebih besar dari harga perolehan.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
       return;
     }
 

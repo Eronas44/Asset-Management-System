@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { activityLogService } from '../../services/activity-log.service';
 import type { ActivityLog, ActivityLogFilterParams } from '../../types/activity-log';
-import { Clock3, Filter, ChevronLeft, ChevronRight, ShieldAlert, Activity, User, Terminal } from 'lucide-react';
+import { Clock3, Filter, ChevronLeft, ChevronRight, ShieldAlert, Activity, User, Terminal, RefreshCw, AlertCircle } from 'lucide-react';
 
 const ActivityLogPage: React.FC = () => {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [filters, setFilters] = useState<ActivityLogFilterParams>({
     action: '',
@@ -21,8 +23,13 @@ const ActivityLogPage: React.FC = () => {
     total: 0
   });
 
-  const fetchLogs = async () => {
-    setLoading(true);
+  const fetchLogs = async (isManualRefresh = false) => {
+    if (isManualRefresh) {
+      setIsRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    setError(null);
     try {
       const response = await activityLogService.getAll(filters);
       setLogs(response.data);
@@ -31,10 +38,13 @@ const ActivityLogPage: React.FC = () => {
         last_page: response.meta.last_page,
         total: response.meta.total
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Gagal memuat log aktivitas:', err);
+      const apiErr = err as { response?: { data?: { message?: string } } };
+      setError(apiErr?.response?.data?.message || 'Gagal memuat catatan log aktivitas dari server.');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -64,10 +74,28 @@ const ActivityLogPage: React.FC = () => {
         className: 'border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-900/40 dark:bg-blue-950/40 dark:text-blue-300'
       };
     }
+    if (action === 'logout') {
+      return {
+        label: 'AUTH / LOGOUT',
+        className: 'border-slate-300 bg-slate-100 text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+      };
+    }
     if (action.startsWith('create')) {
       return {
         label: 'DATA / CREATE',
         className: 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-300'
+      };
+    }
+    if (action.startsWith('update')) {
+      return {
+        label: 'DATA / UPDATE',
+        className: 'border-indigo-200 bg-indigo-50 text-indigo-800 dark:border-indigo-900/40 dark:bg-indigo-950/40 dark:text-indigo-300'
+      };
+    }
+    if (action.startsWith('delete')) {
+      return {
+        label: 'DATA / DELETE',
+        className: 'border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/40 dark:bg-rose-950/40 dark:text-rose-300'
       };
     }
     if (action.startsWith('borrow')) {
@@ -80,6 +108,12 @@ const ActivityLogPage: React.FC = () => {
       return {
         label: 'SIRKULASI / KEMBALI',
         className: 'border-teal-200 bg-teal-50 text-teal-800 dark:border-teal-900/40 dark:bg-teal-950/40 dark:text-teal-300'
+      };
+    }
+    if (action.includes('backup') || action.includes('restore')) {
+      return {
+        label: 'SYSTEM / BACKUP',
+        className: 'border-purple-200 bg-purple-50 text-purple-800 dark:border-purple-900/40 dark:bg-purple-950/40 dark:text-purple-300'
       };
     }
     return {
@@ -107,12 +141,32 @@ const ActivityLogPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="inline-flex items-center gap-2 rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs font-medium text-slate-600 dark:border-slate-800 dark:bg-[#1A2433] dark:text-slate-300 shadow-2xs">
-          <Clock3 size={15} className="text-[#1E3A5F] dark:text-[#F4B752]" />
-          <span className="font-mono font-bold text-slate-900 dark:text-white">{paginationMeta.total}</span>
-          <span className="text-slate-400">catatan riwayat</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => fetchLogs(true)}
+            disabled={loading || isRefreshing}
+            className="inline-flex min-h-[38px] cursor-pointer items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] disabled:opacity-50 dark:border-slate-800 dark:bg-[#1A2433] dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+            title="Segarkan rekaman log audit terbaru"
+          >
+            <RefreshCw size={13} className={isRefreshing ? 'animate-spin text-[#1E3A5F] dark:text-[#F4B752]' : ''} />
+            <span className="hidden sm:inline">Segarkan Log</span>
+          </button>
+
+          <div className="inline-flex items-center gap-2 rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-2 text-xs font-medium text-slate-600 dark:border-slate-800 dark:bg-[#1A2433] dark:text-slate-300 shadow-2xs">
+            <Clock3 size={15} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+            <span className="font-mono font-bold text-slate-900 dark:text-white">{paginationMeta.total}</span>
+            <span className="text-slate-400">catatan riwayat</span>
+          </div>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-start gap-2.5 rounded-xl border border-rose-300 bg-rose-50 p-3.5 text-xs text-rose-800 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300">
+          <AlertCircle size={16} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Filter Toolbar */}
       <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">

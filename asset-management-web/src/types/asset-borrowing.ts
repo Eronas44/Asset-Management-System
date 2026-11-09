@@ -7,6 +7,8 @@ export interface AssetBorrowing {
   borrowed_at: string;
   expected_return_at: string;
   returned_at: string | null;
+  is_returned?: boolean;
+  is_overdue?: boolean;
   overdue_days?: number;
   notes: string | null;
   asset?: Asset;

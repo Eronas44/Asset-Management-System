@@ -43,9 +43,11 @@ api.interceptors.response.use(
     if (response) {
       switch (response.status) {
         case 401:
-          // Skenario 401: Sesi habis / tidak sah, hapus token dan tendang ke login
+          // Skenario 401: Sesi habis / tidak sah, hapus token dan tendang ke login jika tidak sedang di halaman login
           removeToken();
-          window.location.href = '/login';
+          if (typeof window !== 'undefined' && window.location && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
           break;
         case 403:
           // Skenario 403: Akses aksi ditolak, biarkan komponen menampilkan pesan error / toast tanpa merusak sesi halaman
