@@ -4,7 +4,7 @@ import type { UserData } from '../../types/user';
 import { LoadingIndicator } from '../../components/Feedback/LoadingIndicator';
 import { ErrorMessage } from '../../components/Feedback/ErrorMessage';
 import { extractErrorMessage } from '../../utils/error';
-import { ChevronLeft, ChevronRight, Plus, ShieldCheck, UserCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ShieldCheck, UserCheck, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../components/Feedback/ToastContext';
@@ -31,6 +31,7 @@ const UserPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState('staff');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -70,6 +71,7 @@ const UserPage: React.FC = () => {
       setName('');
       setEmail('');
       setPassword('');
+      setShowPassword(false);
       setRole('staff');
       setIsCreateModalOpen(false);
       fetchUsers(1);
@@ -360,13 +362,25 @@ const UserPage: React.FC = () => {
             <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Kata Sandi <span className="text-rose-500">*</span>
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Masukkan kata sandi..."
+                className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 py-2 pl-3 pr-10 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-white dark:focus:border-[#F4B752]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-[#1E3A5F] dark:hover:text-slate-200 transition-colors cursor-pointer"
+                title={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
           </div>
 
           <div>
