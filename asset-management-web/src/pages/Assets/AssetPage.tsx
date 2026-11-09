@@ -24,6 +24,10 @@ const BatchQrPrintModal = React.lazy(() =>
   import('../../components/Labels/BatchQrPrintModal').then(m => ({ default: m.BatchQrPrintModal }))
 );
 
+const AssetPrintSelectionModal = React.lazy(() =>
+  import('../../components/Labels/AssetPrintSelectionModal').then(m => ({ default: m.AssetPrintSelectionModal }))
+);
+
 const assetStatusOptions: Record<AssetType, Array<{ value: AssetStatus; label: string }>> = {
   single: [
     { value: 'tersedia', label: 'Tersedia' },
@@ -161,32 +165,23 @@ const AssetPage: React.FC = () => {
   const [editStatus, setEditStatus] = useState<AssetStatus>('tersedia');
   const [editNotes, setEditNotes] = useState('');
 
-  // Batch Selection & Print Label States
-  const [selectedAssetIds, setSelectedAssetIds] = useState<number[]>([]);
+  // Modal State untuk Cetak Label QR
+  const [isSelectPrintModalOpen, setIsSelectPrintModalOpen] = useState(false);
+  const [printTargetAssets, setPrintTargetAssets] = useState<Asset[]>([]);
   const [isBatchPrintOpen, setIsBatchPrintOpen] = useState(false);
-  const [singlePrintAsset, setSinglePrintAsset] = useState<Asset | null>(null);
 
-  const handleToggleSelectAsset = (id: number) => {
-    setSelectedAssetIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const handleOpenPrintSelector = () => {
+    setIsSelectPrintModalOpen(true);
   };
 
-  const handleSelectAllOnPage = () => {
-    if (selectedAssetIds.length === assets.length && assets.length > 0) {
-      setSelectedAssetIds([]);
-    } else {
-      setSelectedAssetIds(assets.map((a) => a.id));
-    }
-  };
-
-  const handleOpenSinglePrint = (asset: Asset) => {
-    setSinglePrintAsset(asset);
+  const handleProceedFromSelector = (selectedAssets: Asset[]) => {
+    setIsSelectPrintModalOpen(false);
+    setPrintTargetAssets(selectedAssets);
     setIsBatchPrintOpen(true);
   };
 
-  const handleOpenBatchPrint = () => {
-    setSinglePrintAsset(null);
+  const handleOpenSinglePrint = (asset: Asset) => {
+    setPrintTargetAssets([asset]);
     setIsBatchPrintOpen(true);
   };
 
@@ -569,21 +564,13 @@ const AssetPage: React.FC = () => {
           
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={handleOpenBatchPrint}
+              onClick={handleOpenPrintSelector}
               disabled={assets.length === 0}
-              className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold shadow-2xs transition-all disabled:cursor-not-allowed disabled:opacity-50 ${
-                selectedAssetIds.length > 0
-                  ? 'border-[#1E3A5F] bg-[#1E3A5F] text-[#FAF7F2] hover:bg-[#162D4A]'
-                  : 'border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200'
-              }`}
-              title="Cetak lembar stiker QR Code untuk unit aset"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs transition-all hover:bg-[#FAF7F2] hover:border-[#1E3A5F] disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
+              title="Buka pemilih aset untuk mencetak lembar stiker QR Code fisik"
             >
-              <Printer size={14} className={selectedAssetIds.length > 0 ? 'text-[#F4B752]' : 'text-slate-600 dark:text-slate-400'} />
-              <span>
-                {selectedAssetIds.length > 0 
-                  ? `Cetak Label QR (${selectedAssetIds.length})` 
-                  : 'Cetak Label Halaman Ini'}
-              </span>
+              <Printer size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+              <span>Cetak Label QR</span>
             </button>
 
             {hasPermission('view-reports') && (
@@ -643,21 +630,13 @@ const AssetPage: React.FC = () => {
                 {assets.map((asset) => (
                   <div key={asset.id} className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#151D2A] shadow-2xs space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2.5">
-                        <input
-                          type="checkbox"
-                          checked={selectedAssetIds.includes(asset.id)}
-                          onChange={() => handleToggleSelectAsset(asset.id)}
-                          className="mt-1 h-4 w-4 rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
-                        />
-                        <div>
-                          <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
-                            {asset.name}
-                          </h4>
-                          <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
-                            {asset.asset_code}
-                          </span>
-                        </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
+                          {asset.name}
+                        </h4>
+                        <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
+                          {asset.asset_code}
+                        </span>
                       </div>
                       <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${statusStyleMap[asset.status] || statusStyleMap.tersedia}`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
@@ -735,15 +714,6 @@ const AssetPage: React.FC = () => {
               <table className="hidden md:table w-full text-left text-xs text-slate-700 dark:text-slate-300">
                 <thead className="bg-[#F4F0EA] text-[#2B4C6F] border-b border-[#E6E1D6] text-[11px] font-semibold uppercase tracking-wider dark:bg-[#151D2A] dark:text-[#FAF7F2] dark:border-b dark:border-slate-800">
                   <tr>
-                    <th className="w-10 px-4 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked={selectedAssetIds.length === assets.length && assets.length > 0}
-                        onChange={handleSelectAllOnPage}
-                        className="rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
-                        title="Pilih Semua di Halaman Ini"
-                      />
-                    </th>
                     <th className="whitespace-nowrap px-4 py-3">Identifikasi Aset</th>
                     <th className="px-4 py-3">Kategori & Penempatan</th>
                     <th className="whitespace-nowrap px-4 py-3">Status</th>
@@ -758,18 +728,8 @@ const AssetPage: React.FC = () => {
                   {assets.map((asset) => (
                     <tr 
                       key={asset.id} 
-                      className={`transition-colors hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40 ${
-                        selectedAssetIds.includes(asset.id) ? 'bg-[#FAF7F2] dark:bg-slate-800/60' : ''
-                      }`}
+                      className="transition-colors hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40"
                     >
-                      <td className="w-10 px-4 py-3.5 text-center">
-                        <input
-                          type="checkbox"
-                          checked={selectedAssetIds.includes(asset.id)}
-                          onChange={() => handleToggleSelectAsset(asset.id)}
-                          className="rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
-                        />
-                      </td>
                       <td className="px-4 py-3.5">
                         <div className="font-semibold text-slate-900 dark:text-slate-100 leading-snug">
                           {asset.name}
@@ -1355,6 +1315,18 @@ const AssetPage: React.FC = () => {
         </form>
       </Modal>
 
+      {/* Modal Pemilih Aset untuk Cetak Label QR (Lazy Loaded) */}
+      {isSelectPrintModalOpen && (
+        <React.Suspense fallback={null}>
+          <AssetPrintSelectionModal
+            isOpen={isSelectPrintModalOpen}
+            onClose={() => setIsSelectPrintModalOpen(false)}
+            onProceedToPrint={handleProceedFromSelector}
+            initialAssets={assets}
+          />
+        </React.Suspense>
+      )}
+
       {/* Modal Cetak Lembar Stiker QR (Lazy Loaded on Demand) */}
       {isBatchPrintOpen && (
         <React.Suspense fallback={null}>
@@ -1362,15 +1334,9 @@ const AssetPage: React.FC = () => {
             isOpen={isBatchPrintOpen}
             onClose={() => {
               setIsBatchPrintOpen(false);
-              setSinglePrintAsset(null);
+              setPrintTargetAssets([]);
             }}
-            selectedAssets={
-              singlePrintAsset 
-                ? [singlePrintAsset] 
-                : (selectedAssetIds.length > 0 
-                    ? assets.filter((a) => selectedAssetIds.includes(a.id))
-                    : assets)
-            }
+            selectedAssets={printTargetAssets}
           />
         </React.Suspense>
       )}
