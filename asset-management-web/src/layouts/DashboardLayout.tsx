@@ -10,7 +10,10 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/auth.service';
 import { ThemeToggleButton } from '../components/common/ThemeToggleButton';
-import { QrScannerModal } from '../components/Scanner/QrScannerModal';
+
+const QrScannerModal = React.lazy(() => 
+  import('../components/Scanner/QrScannerModal').then(m => ({ default: m.QrScannerModal }))
+);
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -585,11 +588,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
         </div>
       )}
 
-      {/* QR Scanner Modal Global */}
-      <QrScannerModal
-        isOpen={isQrScannerOpen}
-        onClose={() => setIsQrScannerOpen(false)}
-      />
+      {/* QR Scanner Modal Global (Lazy Loaded on Demand) */}
+      {isQrScannerOpen && (
+        <React.Suspense fallback={null}>
+          <QrScannerModal
+            isOpen={isQrScannerOpen}
+            onClose={() => setIsQrScannerOpen(false)}
+          />
+        </React.Suspense>
+      )}
     </div>
   );
 };

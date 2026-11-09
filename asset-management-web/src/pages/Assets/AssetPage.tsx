@@ -16,10 +16,13 @@ import {
   FileText, FileSpreadsheet, ChevronLeft, ChevronRight, 
   ExternalLink, Eye, Info, Pencil, Trash2, Printer
 } from 'lucide-react';
-import { BatchQrPrintModal } from '../../components/Labels/BatchQrPrintModal';
 import { useDebounce } from '../../utils/useDebounce';
 import { useToast } from '../../components/Feedback/ToastContext';
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
+
+const BatchQrPrintModal = React.lazy(() => 
+  import('../../components/Labels/BatchQrPrintModal').then(m => ({ default: m.BatchQrPrintModal }))
+);
 
 const assetStatusOptions: Record<AssetType, Array<{ value: AssetStatus; label: string }>> = {
   single: [
@@ -1352,21 +1355,25 @@ const AssetPage: React.FC = () => {
         </form>
       </Modal>
 
-      {/* Modal Cetak Lembar Stiker QR */}
-      <BatchQrPrintModal
-        isOpen={isBatchPrintOpen}
-        onClose={() => {
-          setIsBatchPrintOpen(false);
-          setSinglePrintAsset(null);
-        }}
-        selectedAssets={
-          singlePrintAsset 
-            ? [singlePrintAsset] 
-            : (selectedAssetIds.length > 0 
-                ? assets.filter((a) => selectedAssetIds.includes(a.id))
-                : assets)
-        }
-      />
+      {/* Modal Cetak Lembar Stiker QR (Lazy Loaded on Demand) */}
+      {isBatchPrintOpen && (
+        <React.Suspense fallback={null}>
+          <BatchQrPrintModal
+            isOpen={isBatchPrintOpen}
+            onClose={() => {
+              setIsBatchPrintOpen(false);
+              setSinglePrintAsset(null);
+            }}
+            selectedAssets={
+              singlePrintAsset 
+                ? [singlePrintAsset] 
+                : (selectedAssetIds.length > 0 
+                    ? assets.filter((a) => selectedAssetIds.includes(a.id))
+                    : assets)
+            }
+          />
+        </React.Suspense>
+      )}
 
       {/* Dialog Konfirmasi Hapus Aset Modern */}
       <ConfirmDialog

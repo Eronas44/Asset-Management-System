@@ -35,7 +35,10 @@ class DashboardController extends Controller
         ")->first();
 
         $activeBorrowingsCount = AssetBorrowing::whereNull('returned_at')->count();
-        $totalBookValue = Asset::all()->sum('current_book_value');
+        // Optimasi alokasi memori: Hanya muat kolom finansial yang dibutuhkan untuk accessor current_book_value
+        $totalBookValue = Asset::select(['id', 'purchase_date', 'purchase_price', 'useful_life_years', 'residual_value'])
+            ->get()
+            ->sum('current_book_value');
 
         return [
             'total_assets' => (int) $assetStats->total,
@@ -69,8 +72,8 @@ class DashboardController extends Controller
             ->whereNull('returned_at')
             ->where('expected_return_at', '<', now());
 
-        // 1. Hitung total kuantitas peminjaman menunggak saat ini
-        $overdueCount = $overdueQuery->count();
+        // 1. Hitung total kuantitas peminjaman menunggak saat ini (clone query agar tidak mengubah state builder)
+        $overdueCount = (clone $overdueQuery)->count();
 
         // 2. Ambil maksimal 10 rekaman data menunggak paling baru
         $overdueItems = $overdueQuery->latest('expected_return_at')
