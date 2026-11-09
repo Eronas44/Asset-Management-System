@@ -11,7 +11,8 @@ import {
   AlertCircle,
   Layers,
   CheckSquare,
-  Square
+  Square,
+  Filter
 } from 'lucide-react';
 import type { Asset, AssetStatus } from '../../types/asset';
 import { assetService } from '../../services/asset.service';
@@ -58,8 +59,10 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
   initialAssets = []
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [allSystemAssets, setAllSystemAssets] = useState<Asset[]>(initialAssets);
   const [loading, setLoading] = useState(false);
+  const [isPreparing, setIsPreparing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Map ID -> Asset untuk menyimpan pilihan pengguna
@@ -69,6 +72,8 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
   useEffect(() => {
     if (isOpen) {
       setSearchTerm('');
+      setStatusFilter('');
+      setIsPreparing(false);
       setErrorMessage(null);
       loadAllSystemAssets();
     } else {
@@ -96,18 +101,23 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     }
   };
 
-  // Filter aset lokal secara instan berdasarkan kata kunci pencarian
+  // Filter aset lokal secara instan berdasarkan kata kunci pencarian dan filter status
   const filteredAssets = useMemo(() => {
-    if (!searchTerm.trim()) return allSystemAssets;
     const q = searchTerm.toLowerCase().trim();
     return allSystemAssets.filter((a) => {
+      // 1. Filter Status
+      if (statusFilter && a.status !== statusFilter) {
+        return false;
+      }
+      // 2. Filter Pencarian Teks
+      if (!q) return true;
       const matchName = a.name.toLowerCase().includes(q);
       const matchCode = a.asset_code.toLowerCase().includes(q);
       const matchCategory = a.category?.name ? a.category.name.toLowerCase().includes(q) : false;
       const matchLocation = a.location?.name ? a.location.name.toLowerCase().includes(q) : false;
       return matchName || matchCode || matchCategory || matchLocation;
     });
-  }, [allSystemAssets, searchTerm]);
+  }, [allSystemAssets, searchTerm, statusFilter]);
 
   // Toggle pilihan aset per item
   const handleToggleAsset = (asset: Asset) => {
@@ -128,7 +138,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     return allSystemAssets.every((a) => selectedMap.has(a.id));
   }, [allSystemAssets, selectedMap]);
 
-  // Cek apakah seluruh aset yang sedang tampil (hasil pencarian) sudah terpilih
+  // Cek apakah seluruh aset yang sedang tampil (hasil pencarian/filter) sudah terpilih
   const isAllFilteredSelected = useMemo(() => {
     if (filteredAssets.length === 0) return false;
     return filteredAssets.every((a) => selectedMap.has(a.id));
@@ -145,7 +155,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     }
   };
 
-  // Pilih Semua Aset di Hasil Pencarian Saat Ini
+  // Pilih Semua Aset di Hasil Pencarian/Filter Saat Ini
   const handleToggleSelectAllFiltered = () => {
     setSelectedMap((prev) => {
       const next = new Map(prev);
@@ -162,10 +172,17 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
     setSelectedMap(new Map());
   };
 
+  // Penanganan klik tombol cetak dengan loading halus (mencegah freeze saat ratusan aset dimuat)
   const handleProceed = () => {
     const selectedList = Array.from(selectedMap.values());
     if (selectedList.length === 0) return;
-    onProceedToPrint(selectedList);
+    
+    setIsPreparing(true);
+    // Beri jeda 180ms agar UI merender indikator animasi loading terlebih dahulu
+    setTimeout(() => {
+      onProceedToPrint(selectedList);
+      setIsPreparing(false);
+    }, 180);
   };
 
   // Estimasi jumlah lembar kertas A4
@@ -187,6 +204,24 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
       {/* Modal Dialog */}
       <div className="relative z-10 flex flex-col w-full max-w-3xl max-h-[92vh] overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-2xl dark:border-slate-800 dark:bg-[#1A2433] animate-in fade-in zoom-in-95 duration-150">
         
+        {/* Loading Overlay Saat Transisi Cetak */}
+        {isPreparing && (
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 dark:bg-[#1A2433]/95 backdrop-blur-xs p-6 text-center animate-in fade-in duration-150">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752] shadow-xs">
+              <Printer size={26} className="animate-pulse" />
+            </div>
+            <h4 className="text-sm font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
+              Menyiapkan Lembar Label QR...
+            </h4>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-xs">
+              Mengalokasikan {selectedMap.size} stiker ke dalam {estimatedSheets2Col} lembar format A4 presisi.
+            </p>
+            <div className="mt-4 w-48 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+              <div className="h-full bg-[#1E3A5F] dark:bg-[#F4B752] rounded-full animate-pulse w-full" />
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-[#E6E1D6] bg-[#FAF7F2]/60 px-6 py-4 dark:border-slate-800 dark:bg-[#151D2A]/60">
           <div className="flex items-center gap-3">
@@ -205,7 +240,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
                 )}
               </div>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                Pilih aset dari seluruh sistem ({allSystemAssets.length} unit). Kertas dan PDF akan otomatis bertambah jika melebihi kapasitas stiker 1 lembar.
+                Pilih aset dari seluruh sistem ({allSystemAssets.length} unit). Filter status dan kata kunci tersedia di bawah.
               </p>
             </div>
           </div>
@@ -220,33 +255,87 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
           </button>
         </div>
 
-        {/* Toolbar Pencarian & Kontrol Pilihan */}
+        {/* Toolbar Pencarian, Filter Status & Kontrol Pilihan */}
         <div className="border-b border-[#E6E1D6] bg-[#FAF7F2]/30 px-6 py-3.5 dark:border-slate-800 dark:bg-[#111822]/40 space-y-3">
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-              <Search size={14} />
+          
+          {/* Baris Input Pencarian & Dropdown Status */}
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            {/* Input Pencarian */}
+            <div className="relative sm:col-span-7">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                <Search size={14} />
+              </div>
+              <input
+                type="text"
+                placeholder="Cari nama aset, kode inventaris, kategori, lokasi..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-white py-2 pl-9 pr-9 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-100 dark:focus:border-[#F4B752]"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  title="Hapus pencarian"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
-            <input
-              type="text"
-              placeholder="Cari berdasarkan nama aset, kode inventaris (misal: AST-2026-0001), atau kategori..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-white py-2 pl-9 pr-9 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-100 dark:focus:border-[#F4B752]"
-            />
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={() => setSearchTerm('')}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                title="Hapus pencarian"
+
+            {/* Dropdown Filter Status */}
+            <div className="sm:col-span-5 relative">
+              <select
+                aria-label="Filter status aset"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="h-10 w-full rounded-xl border border-[#E6E1D6] bg-white px-3 text-xs text-slate-800 outline-none transition-all focus:border-[#1E3A5F] focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-200 dark:focus:border-[#F4B752] cursor-pointer"
               >
-                <X size={14} />
+                <option value="">Semua Status Operasional</option>
+                <option value="tersedia">Tersedia (Ready)</option>
+                <option value="rusak">Rusak</option>
+                <option value="sedang diperbaiki">Sedang Diperbaiki</option>
+                <option value="hilang">Hilang</option>
+                <option value="dibuang">Dibuang</option>
+                <option value="habis">Habis</option>
+                <option value="kadaluarsa">Kadaluarsa</option>
+                <option value="borrowed">Dipinjam (Legacy)</option>
+                <option value="maintenance">Perawatan (Legacy)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Quick Filter Pills untuk Status Populer */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 text-xs">
+            <span className="text-slate-400 shrink-0 text-[11px] font-medium flex items-center gap-1">
+              <Filter size={11} />
+              Filter Cepat:
+            </span>
+            {[
+              { val: '', label: 'Semua Status' },
+              { val: 'tersedia', label: 'Tersedia' },
+              { val: 'rusak', label: 'Rusak' },
+              { val: 'sedang diperbaiki', label: 'Diperbaiki' },
+              { val: 'hilang', label: 'Hilang' },
+            ].map((pill) => (
+              <button
+                key={pill.val}
+                type="button"
+                onClick={() => setStatusFilter(pill.val)}
+                className={`px-2.5 py-1 rounded-lg border text-[11px] font-medium transition-all cursor-pointer shrink-0 ${
+                  statusFilter === pill.val
+                    ? 'border-[#1E3A5F] bg-[#1E3A5F] text-[#FAF7F2] dark:border-[#F4B752] dark:bg-[#F4B752] dark:text-slate-900 shadow-2xs font-semibold'
+                    : 'border-[#E6E1D6] bg-white text-slate-600 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-300'
+                }`}
+              >
+                {pill.label}
               </button>
-            )}
+            ))}
           </div>
 
           {/* Baris Tombol Aksi Cepat */}
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-1">
             <div className="flex flex-wrap items-center gap-2">
               {/* Tombol Pilih Semua Aset di Sistem */}
               <button
@@ -267,17 +356,17 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
                 </span>
               </button>
 
-              {/* Tombol Pilih Semua Hasil Pencarian jika sedang memfilter */}
-              {searchTerm && filteredAssets.length > 0 && filteredAssets.length !== allSystemAssets.length && (
+              {/* Tombol Pilih Semua Hasil Filter jika sedang memfilter */}
+              {(searchTerm || statusFilter) && filteredAssets.length > 0 && filteredAssets.length !== allSystemAssets.length && (
                 <button
                   type="button"
                   onClick={handleToggleSelectAllFiltered}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-200 text-xs font-medium"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#151D2A] dark:text-slate-200 text-xs font-medium cursor-pointer"
                 >
                   <span>
                     {isAllFilteredSelected 
                       ? 'Batal Pilih Hasil Filter' 
-                      : `Pilih Semua Hasil Pencarian (${filteredAssets.length})`}
+                      : `Pilih Hasil Filter (${filteredAssets.length} unit)`}
                   </span>
                 </button>
               )}
@@ -297,7 +386,7 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
         </div>
 
         {/* Daftar Item Aset dengan Checkbox */}
-        <div className="flex-1 overflow-y-auto px-6 py-3 divide-y divide-[#EFECE6] dark:divide-slate-800/70 min-h-[260px] max-h-[50vh]">
+        <div className="flex-1 overflow-y-auto px-6 py-3 divide-y divide-[#EFECE6] dark:divide-slate-800/70 min-h-[260px] max-h-[48vh]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 dark:text-slate-500">
               <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A5F] dark:border-slate-700 dark:border-t-[#F4B752]" />
@@ -321,10 +410,12 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
                 <Package size={20} />
               </div>
               <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Tidak ada aset yang sesuai
+                Tidak ada aset yang sesuai kriteria
               </p>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                {searchTerm ? `Tidak ditemukan data untuk "${searchTerm}"` : 'Belum ada aset terdaftar di sistem.'}
+                {searchTerm || statusFilter 
+                  ? 'Coba sesuaikan kata kunci pencarian atau ubah filter status operasional.' 
+                  : 'Belum ada aset terdaftar di sistem.'}
               </p>
             </div>
           ) : (
@@ -416,7 +507,8 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              disabled={isPreparing}
+              className="inline-flex min-h-[38px] items-center justify-center rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] disabled:opacity-50 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               Batal
             </button>
@@ -424,15 +516,24 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
             <button
               type="button"
               onClick={handleProceed}
-              disabled={selectedMap.size === 0}
+              disabled={selectedMap.size === 0 || isPreparing}
               className="inline-flex min-h-[38px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f] cursor-pointer"
             >
-              <Printer size={14} className="text-[#F4B752]" />
-              <span>
-                {selectedMap.size > 0 
-                  ? `Cetak Label QR (${selectedMap.size})` 
-                  : 'Cetak Label QR'}
-              </span>
+              {isPreparing ? (
+                <>
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  <span>Menyiapkan...</span>
+                </>
+              ) : (
+                <>
+                  <Printer size={14} className="text-[#F4B752]" />
+                  <span>
+                    {selectedMap.size > 0 
+                      ? `Cetak Label QR (${selectedMap.size})` 
+                      : 'Cetak Label QR'}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </div>

@@ -36,7 +36,7 @@ const mockAssets: Asset[] = [
     current_book_value: 12000000,
     asset_category_id: 2,
     asset_location_id: 2,
-    status: 'tersedia',
+    status: 'rusak',
     purchase_date: '2026-02-01',
     purchase_price: 15000000,
     residual_value: 3000000,
@@ -91,6 +91,31 @@ describe('AssetPrintSelectionModal Unit Test', () => {
     expect(screen.getByText('Kursi Kerja Ergonomis Herman Miller')).toBeInTheDocument();
   });
 
+  it('dapat memfilter aset berdasarkan status operasional (tersedia / rusak)', async () => {
+    const handleClose = vi.fn();
+    const handleProceed = vi.fn();
+
+    renderWithProviders(
+      <AssetPrintSelectionModal
+        isOpen={true}
+        onClose={handleClose}
+        onProceedToPrint={handleProceed}
+        initialAssets={mockAssets}
+      />
+    );
+
+    await screen.findByText('MacBook Pro M2 Max');
+
+    // Filter cepat dengan tombol 'Rusak'
+    const rusakPills = screen.getAllByRole('button', { name: /^Rusak$/i });
+    fireEvent.click(rusakPills[0]);
+
+    // MacBook Pro (tersedia) harus tersembunyi
+    expect(screen.queryByText('MacBook Pro M2 Max')).not.toBeInTheDocument();
+    // Kursi Kerja (rusak) harus tetap tampil
+    expect(screen.getByText('Kursi Kerja Ergonomis Herman Miller')).toBeInTheDocument();
+  });
+
   it('dapat memilih aset dan memanggil onProceedToPrint saat tombol cetak ditekan', async () => {
     const handleClose = vi.fn();
     const handleProceed = vi.fn();
@@ -118,7 +143,9 @@ describe('AssetPrintSelectionModal Unit Test', () => {
     expect(proceedBtn).not.toBeDisabled();
     fireEvent.click(proceedBtn);
 
-    expect(handleProceed).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(handleProceed).toHaveBeenCalledTimes(1);
+    });
     expect(handleProceed).toHaveBeenCalledWith([expect.objectContaining({ id: 101, asset_code: 'AST-TEST-001' })]);
   });
 
@@ -145,7 +172,9 @@ describe('AssetPrintSelectionModal Unit Test', () => {
     const proceedBtn = screen.getByRole('button', { name: /Cetak Label QR \(2\)/i });
     fireEvent.click(proceedBtn);
 
-    expect(handleProceed).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(handleProceed).toHaveBeenCalledTimes(1);
+    });
     expect(handleProceed).toHaveBeenCalledWith(expect.arrayContaining([
       expect.objectContaining({ id: 101 }),
       expect.objectContaining({ id: 102 }),

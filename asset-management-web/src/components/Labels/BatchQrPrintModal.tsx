@@ -37,7 +37,8 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
 
   // Status Pemrosesan Web PDF
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStatus, setProcessingStatus] = useState('');
+  const [progressPercent, setProgressPercent] = useState<number>(0);
+  const [progressDetail, setProgressDetail] = useState<string>('');
   const [activeSheetTab, setActiveSheetTab] = useState<number>(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -61,8 +62,9 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
 
     try {
       setIsProcessing(true);
+      setProgressPercent(0);
       setSuccessMessage(null);
-      setProcessingStatus('Menyusun stiker dokumen PDF standar A4...');
+      setProgressDetail('Menyiapkan format dokumen standar A4...');
 
       const pdf = new jsPDF({
         orientation: 'portrait',
@@ -80,9 +82,10 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
       const cardW = is2Col ? 92 : 62;
       const cardH = is2Col ? 50 : 41;
 
-      for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
-        setProcessingStatus(`Menyusun lembar A4 ke-${pageIdx + 1} dari ${totalPages}...`);
+      let processedStickers = 0;
+      const totalStickers = selectedAssets.length;
 
+      for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
         if (pageIdx > 0) {
           pdf.addPage('a4', 'portrait');
         }
@@ -208,6 +211,16 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
           pdf.setFontSize(is2Col ? 5 : 4.5);
           pdf.setTextColor(148, 163, 184);
           pdf.text('PROPERTI PERUSAHAAN • DILARANG MELEPAS STIKER', cardX + cardW / 2, cardY + cardH - 1.8, { align: 'center' });
+
+          processedStickers++;
+          const currentPercent = Math.min(95, Math.round((processedStickers / totalStickers) * 95));
+          setProgressPercent(currentPercent);
+          setProgressDetail(`Menyusun stiker ${processedStickers} dari ${totalStickers} (Lembar A4 ke-${pageIdx + 1}/${totalPages})`);
+
+          // Jeda mikro agar main thread browser dapat merender progress bar tanpa freeze
+          if (itemIdx % 2 === 0 || itemIdx === pageAssets.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 8));
+          }
         }
 
         // Footer Lembar A4
@@ -217,7 +230,9 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
         pdf.text(`LEMBAR ${pageIdx + 1} DARI ${totalPages} • STANDAR A4 (210 x 297 mm)`, 105, 292, { align: 'center' });
       }
 
-      setProcessingStatus('Menyelesaikan berkas...');
+      setProgressPercent(98);
+      setProgressDetail('Menyelesaikan dan merender dokumen PDF...');
+      await new Promise((resolve) => setTimeout(resolve, 60));
       const fileName = `Stiker-QR-Aset-A4-${new Date().toISOString().slice(0, 10)}.pdf`;
 
       if (action === 'download') {
@@ -254,12 +269,14 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
         };
         setSuccessMessage('Perintah cetak dikirim ke printer.');
       }
+      setProgressPercent(100);
     } catch (error) {
       console.error('Gagal memproses PDF stiker:', error);
       alert('Terjadi kesalahan saat memproses stiker QR langsung dari web.');
     } finally {
       setIsProcessing(false);
-      setProcessingStatus('');
+      setProgressPercent(0);
+      setProgressDetail('');
     }
   };
 
@@ -377,10 +394,33 @@ export const BatchQrPrintModal: React.FC<BatchQrPrintModalProps> = ({
           </div>
         )}
 
+        {/* Modal Overlay Progress Pemrosesan PDF Real-Time */}
         {isProcessing && (
-          <div className="flex items-center gap-3 bg-blue-50 px-6 py-2 text-xs text-blue-900 border-b border-blue-100 dark:bg-sky-950/40 dark:border-sky-900 dark:text-sky-200 print:hidden">
-            <Loader2 size={14} className="animate-spin text-blue-600 dark:text-sky-400" />
-            <span className="font-medium">{processingStatus}</span>
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+            <div className="w-full max-w-md rounded-2xl border border-[#E6E1D6] bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-[#1A2433] text-center space-y-4">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752] shadow-xs">
+                <FileDown size={22} className="animate-bounce" />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-100">
+                  <span>Memproses Dokumen PDF Label QR</span>
+                  <span className="font-mono text-xs text-[#1E3A5F] dark:text-[#F4B752] font-bold">{progressPercent}%</span>
+                </div>
+                
+                {/* Visual Progress Bar */}
+                <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-0.5">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-[#1E3A5F] via-indigo-600 to-[#F4B752] transition-all duration-150"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                {progressDetail || 'Menyusun berkas stiker...'}
+              </p>
+            </div>
           </div>
         )}
 
