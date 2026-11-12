@@ -40,43 +40,46 @@ class DatabaseBackupService
     }
 
     /**
-     * Membuat file backup baru (.sql) dari database pgsql aktif.
+     * Membuat file backup baru (.sql) dari database mysql aktif.
      */
     public function createBackup(): string
     {
         $filename = 'backup-' . Carbon::now()->format('Y-m-d-H-i-s') . '.sql';
-        $filePath = storage_path('app/' . $this->folder . '/' . $filename);
+        $folderPath = Storage::disk($this->disk)->path($this->folder);
+        $filePath = $folderPath . DIRECTORY_SEPARATOR . $filename;
 
-        // Pastikan folder backups tersedia
-        if (!file_exists(storage_path('app/' . $this->folder))) {
-            mkdir(storage_path('app/' . $this->folder), 0755, true);
+        // Pastikan folder backups tersedia pada disk local
+        if (!file_exists($folderPath)) {
+            mkdir($folderPath, 0755, true);
         }
 
-        $pgDumpPath = $this->findExecutable('pg_dump');
+        $mysqldumpPath = $this->findExecutable('mysqldump');
 
-        if (!$pgDumpPath) {
-            throw new \Exception('pg_dump tidak ditemukan. Install PostgreSQL client di environment aplikasi atau rebuild container app agar backup database bisa dijalankan.');
+        if (!$mysqldumpPath) {
+            throw new \Exception('mysqldump tidak ditemukan. Install MySQL client di environment aplikasi atau rebuild container app agar backup database bisa dijalankan.');
         }
 
         $process = new Process([
-            $pgDumpPath,
-            '-U', (string) config('database.connections.pgsql.username'),
-            '-h', (string) config('database.connections.pgsql.host'),
-            '-p', (string) config('database.connections.pgsql.port'),
-            (string) config('database.connections.pgsql.database'),
+            $mysqldumpPath,
+            '-u', (string) config('database.connections.mysql.username'),
+            '-h', (string) config('database.connections.mysql.host'),
+            '-P', (string) config('database.connections.mysql.port'),
+            '--single-transaction',
+            '--routines',
+            '--events',
+            '--result-file=' . $filePath,
+            (string) config('database.connections.mysql.database'),
         ]);
         $process->setEnv(array_merge($_ENV, $_SERVER, [
-            'PGPASSWORD' => (string) config('database.connections.pgsql.password'),
+            'MYSQL_PWD' => (string) config('database.connections.mysql.password'),
         ]));
         $process->setTimeout(null);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (!$process->isSuccessful() || !file_exists($filePath)) {
             $details = trim($process->getErrorOutput() . PHP_EOL . $process->getOutput());
             throw new \Exception('Gagal membuat backup database. ' . ($details !== '' ? $details : 'Kode error: ' . $process->getExitCode()));
         }
-
-        file_put_contents($filePath, $process->getOutput());
 
         return $filename;
     }
@@ -86,31 +89,42 @@ class DatabaseBackupService
      */
     public function restoreBackup(string $filename): void
     {
-        $filePath = storage_path('app/' . $this->folder . '/' . $filename);
+        $filePath = Storage::disk($this->disk)->path($this->folder . DIRECTORY_SEPARATOR . $filename);
 
         if (!file_exists($filePath)) {
             throw new \Exception("File backup tidak ditemukan.");
         }
 
-        $psqlPath = $this->findExecutable('psql');
+        $mysqlPath = $this->findExecutable('mysql');
 
-        if (!$psqlPath) {
-            throw new \Exception('psql tidak ditemukan. Install PostgreSQL client di environment aplikasi atau rebuild container app agar restore database bisa dijalankan.');
+        if (!$mysqlPath) {
+            throw new \Exception('mysql client tidak ditemukan. Install MySQL client di environment aplikasi atau rebuild container app agar restore database bisa dijalankan.');
+        }
+
+        $stream = fopen($filePath, 'r');
+        if (!$stream) {
+            throw new \Exception("Tidak dapat membuka file arsip database untuk dipulihkan.");
         }
 
         $process = new Process([
-            $psqlPath,
-            '-U', (string) config('database.connections.pgsql.username'),
-            '-h', (string) config('database.connections.pgsql.host'),
-            '-p', (string) config('database.connections.pgsql.port'),
-            (string) config('database.connections.pgsql.database'),
+            $mysqlPath,
+            '-u', (string) config('database.connections.mysql.username'),
+            '-h', (string) config('database.connections.mysql.host'),
+            '-P', (string) config('database.connections.mysql.port'),
+            (string) config('database.connections.mysql.database'),
         ]);
-        $process->setInput(file_get_contents($filePath));
+        $process->setInput($stream);
         $process->setEnv(array_merge($_ENV, $_SERVER, [
-            'PGPASSWORD' => (string) config('database.connections.pgsql.password'),
+            'MYSQL_PWD' => (string) config('database.connections.mysql.password'),
         ]));
         $process->setTimeout(null);
-        $process->run();
+        try {
+            $process->run();
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+        }
 
         if (!$process->isSuccessful()) {
             $details = trim($process->getErrorOutput() . PHP_EOL . $process->getOutput());
@@ -134,6 +148,23 @@ class DatabaseBackupService
 
     private function findExecutable(string $name): ?string
     {
-        return (new ExecutableFinder())->find($name);
+        $path = (new ExecutableFinder())->find($name);
+        if ($path) {
+            return $path;
+        }
+
+        $fallbacks = [
+            "/usr/bin/{$name}",
+            "/usr/local/bin/{$name}",
+            "/bin/{$name}",
+        ];
+
+        foreach ($fallbacks as $fallback) {
+            if (file_exists($fallback) && is_executable($fallback)) {
+                return $fallback;
+            }
+        }
+
+        return null;
     }
 }

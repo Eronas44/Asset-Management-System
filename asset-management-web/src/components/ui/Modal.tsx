@@ -7,6 +7,7 @@ interface ModalProps {
   description?: string;
   onClose: () => void;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidthClassName?: string;
 }
 
@@ -16,6 +17,7 @@ const Modal: React.FC<ModalProps> = ({
   description,
   onClose,
   children,
+  footer,
   maxWidthClassName = 'max-w-3xl'
 }) => {
   useEffect(() => {
@@ -34,32 +36,38 @@ const Modal: React.FC<ModalProps> = ({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
       <button
         type="button"
         aria-label="Close modal overlay"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-[#090D16]/70 backdrop-blur-md transition-opacity"
       />
-      <div className={`relative z-10 w-full ${maxWidthClassName} overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900`}>
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5 dark:border-slate-800">
+      <div className={`relative z-10 w-full ${maxWidthClassName} overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white shadow-xl dark:border-slate-800 dark:bg-[#1A2433] flex flex-col animate-in fade-in zoom-in-95 duration-150`}>
+        <div className="flex items-start justify-between gap-4 border-b border-[#E6E1D6] bg-[#FAF7F2]/40 px-6 py-4 dark:border-slate-800 dark:bg-[#151D2A]/40">
           <div>
-            <h3 className="text-xl font-bold text-slate-900 dark:text-white">{title}</h3>
-            {description && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>}
+            <h3 className="text-base font-bold text-[#2B4C6F] dark:text-[#FAF7F2] tracking-tight">{title}</h3>
+            {description && <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{description}</p>}
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="min-h-[36px] min-w-[36px] inline-flex items-center justify-center rounded-xl border border-[#E6E1D6] text-slate-500 transition-colors hover:bg-[#FAF7F2] hover:text-[#1E3A5F] dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white cursor-pointer"
             aria-label="Close modal"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        <div className="max-h-[85vh] overflow-y-auto px-6 py-6">
+        <div className={`overflow-y-auto px-6 py-5 ${footer ? 'max-h-[68vh]' : 'max-h-[82vh]'}`}>
           {children}
         </div>
+
+        {footer && (
+          <div className="flex items-center justify-end gap-2.5 border-t border-[#E6E1D6] bg-[#FAF7F2]/60 px-6 py-3.5 dark:border-slate-800 dark:bg-[#151D2A]/60">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );

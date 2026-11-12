@@ -60,7 +60,17 @@ export const assetService = {
   getById: async (id: number): Promise<{ data: Asset }> => {
     const response = await api.get<{ data: Asset }>(`/assets/${id}`);
     return response.data;
+  },
+
+  // Memperbarui aset yang sudah ada
+  update: async (id: number, payload: Partial<CreateAssetPayload>): Promise<{ message: string; data: Asset }> => {
+    const response = await api.put<{ message: string; data: Asset }>(`/assets/${id}`, payload);
+    return response.data;
+  },
+
+  // Menghapus aset (Soft delete)
+  delete: async (id: number): Promise<{ message: string }> => {
+    const response = await api.delete<{ message: string }>(`/assets/${id}`);
+    return response.data;
   }
-
-
 };

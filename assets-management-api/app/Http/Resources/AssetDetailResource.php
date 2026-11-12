@@ -9,7 +9,8 @@ class AssetDetailResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $baseUrl = url('/api/public/assets/' . $this->uuid);
+        $frontendUrl = env('FRONTEND_URL', 'http://localhost:2000');
+        $publicUrl = rtrim($frontendUrl, '/') . '/public/assets/' . $this->uuid;
 
         return [
             'id' => $this->id,
@@ -18,8 +19,8 @@ class AssetDetailResource extends JsonResource
             'name' => $this->name,
             'type' => $this->type,
             'quantity' => $this->quantity,
-            'public_url' => $baseUrl,
-            'qr_code_url' => $baseUrl,
+            'public_url' => $publicUrl,
+            'qr_code_url' => $publicUrl,
             'purchase_date' => $this->purchase_date,
             'purchase_price' => (float) $this->purchase_price,
             'status' => $this->status,

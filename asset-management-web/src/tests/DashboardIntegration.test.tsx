@@ -24,9 +24,9 @@ describe('Integration Test — Halaman Dashboard Utama', () => {
       expect(screen.queryByText(/Memperbarui matriks statistik/i)).not.toBeInTheDocument();
     });
 
-    // Verifikasi nilai total aset dan nilai buku tampil akurat di layar browser simulasi
+    // Verifikasi nilai total aset dan unit tersedia tampil akurat di layar browser simulasi
     expect(screen.getByText(mockDashboardStats.total_assets.toString())).toBeInTheDocument();
-    expect(screen.getByText(/TOTAL NILAI BUKU EKONOMIS/i)).toBeInTheDocument();
+    expect(screen.getByText(/Unit Tersedia/i)).toBeInTheDocument();
   });
 
   it('harus memunculkan komponen ErrorMessage jika salah satu request API gagal', async () => {
@@ -38,7 +38,7 @@ describe('Integration Test — Halaman Dashboard Utama', () => {
     renderWithProviders(<DashboardPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Gagal Memproses Permintaan/i)).toBeInTheDocument();
+      expect(screen.getByText(/Kendala Pemrosesan Permintaan/i)).toBeInTheDocument();
       expect(screen.getByText(/Server Database Down/i)).toBeInTheDocument();
       expect(screen.getByText(/Trace ID Pelacakan: ERR-102/i)).toBeInTheDocument();
     });

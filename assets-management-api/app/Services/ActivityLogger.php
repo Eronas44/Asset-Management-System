@@ -23,4 +23,20 @@ class ActivityLogger
             'created_at' => now(),
         ]);
     }
+
+    /**
+     * Log aktivitas operasi massal (batch/bulk) secara terpusat untuk menghindari log spam.
+     */
+    public static function logBatch(string $action, string $description, int $count, ?array $properties = null): void
+    {
+        ActivityLog::create([
+            'user_id' => Auth::id(),
+            'action' => $action,
+            'subject_type' => 'BatchOperation',
+            'subject_id' => null,
+            'description' => $description . " (Total {$count} entri diproses)",
+            'properties' => array_merge($properties ?? [], ['affected_count' => $count]),
+            'created_at' => now(),
+        ]);
+    }
 }

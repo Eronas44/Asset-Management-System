@@ -43,7 +43,7 @@ class StoreAssetRequest extends FormRequest
                 'required',
                 'numeric',
                 'min:0',
-                'max:' . $this->input('purchase_price', 0),
+                'lte:purchase_price',
             ],
 
             // Status dibatasi ketat per tipe aset, dengan alias kompatibilitas untuk data lama

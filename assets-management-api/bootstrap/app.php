@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(\App\Http\Middleware\SecureHeadersMiddleware::class);
+        $middleware->redirectGuestsTo(fn () => null);
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -43,7 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
                     $statusCode = 422;
                     $message = 'Validation failed';
                     $errors = $e->errors();
-                } elseif ($e instanceof AuthenticationException) {
+                } elseif ($e instanceof AuthenticationException || ($e instanceof \Symfony\Component\Routing\Exception\RouteNotFoundException && str_contains($e->getMessage(), 'login'))) {
                     $statusCode = 401;
                     $message = 'Unauthorized';
                 } elseif ($e instanceof AuthorizationException || $e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
@@ -55,6 +56,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 } elseif ($e instanceof HttpException) {
                     $statusCode = $e->getStatusCode();
                     $message = $e->getMessage();
+                }
+
+                if ($statusCode === 500) {
+                    \Illuminate\Support\Facades\Log::error("Unhandled API exception [{$traceId}]: " . $e->getMessage(), [
+                        'exception' => get_class($e),
+                        'file' => $e->getFile(),
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
                 }
 
                 // 3. Bangun struktur respons gagal yang seragam sesuai instruksi kerja

@@ -16,8 +16,8 @@ class StoreAssetBorrowingRequest extends FormRequest
         return [
             'asset_id' => 'required|integer|exists:assets,id',
             'borrower_name' => 'required|string|max:255',
-            'borrowed_at' => 'required|date_format:Y-m-d H:i:s',
-            'expected_return_at' => 'required|date_format:Y-m-d H:i:s|after:borrowed_at',
+            'borrowed_at' => 'nullable|date',
+            'expected_return_at' => 'required|date',
             'notes' => 'nullable|string',
         ];
     }

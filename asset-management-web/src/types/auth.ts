@@ -16,6 +16,8 @@ export interface UserProfileResponse {
 export interface AuthResponse {
   token: string;
   user: User;
+  roles?: string[];
+  permissions?: string[];
 }
 
 export interface LoginCredentials {

@@ -73,6 +73,21 @@ class AssetWorkflowApiTest extends TestCase
         $response->assertStatus(403); // Forbidden terpusat dari exception handler Tugas 37
     }
 
+    public function test_staff_dapat_membaca_daftar_aset_kategori_dan_lokasi()
+    {
+        $this->actingAs($this->staff, 'sanctum')
+            ->getJson('/api/assets')
+            ->assertOk();
+
+        $this->actingAs($this->staff, 'sanctum')
+            ->getJson('/api/asset-categories')
+            ->assertOk();
+
+        $this->actingAs($this->staff, 'sanctum')
+            ->getJson('/api/asset-locations')
+            ->assertOk();
+    }
+
     public function test_proses_transaksi_peminjaman_dan_perubahan_status_otomatis()
     {
         // Buat aset awal berstatus available

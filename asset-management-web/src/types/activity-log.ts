@@ -2,7 +2,7 @@ export interface ActivityLog {
   id: number;
   action: string;
   description: string;
-  properties: any | null;
+  properties: Record<string, unknown> | null;
   operator: string;
   created_at: string;
 }

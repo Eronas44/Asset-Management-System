@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Http\Requests\StoreAssetRequest;
+use App\Http\Requests\UpdateAssetRequest;
 use App\Http\Resources\AssetResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Services\ActivityLogger;
 use App\Http\Resources\AssetDetailResource;
+use Illuminate\Support\Facades\Cache;
 
 class AssetController extends Controller
 {
@@ -37,14 +39,15 @@ class AssetController extends Controller
      * )
      */
     
-   /**
+    /**
      * Menampilkan daftar semua aset dengan filter dan pagination.
      */
     public function index(Request $request)
     {
-        // Mengambil query parameter dan menetapkan nilai default per_page = 10
+        // Mengambil query parameter dan menetapkan nilai per_page dinamis (mendukung 'all' atau hingga 1000)
         $filters = $request->only(['search', 'status', 'asset_category_id', 'asset_location_id']);
-        $perPage = $request->input('per_page', 10);
+        $perPageInput = $request->input('per_page', 10);
+        $perPage = ($perPageInput === 'all' || (int)$perPageInput <= 0) ? 1000 : min((int)$perPageInput, 1000);
     
         $assets = Asset::with(['category', 'location'])
             ->filter($filters)
@@ -66,6 +69,9 @@ class AssetController extends Controller
         // Memuat instans relasi sebelum dikembalikan ke resource respons
         $asset->load(['category', 'location']);
 
+        // Invalidate cache statistik dashboard
+        Cache::forget('dashboard_stats');
+
         return response()->json([
             'message' => 'Success',
             'data' => new AssetResource($asset)
@@ -80,8 +86,11 @@ class AssetController extends Controller
      */
     public function showPublic(string $uuid): JsonResponse
     {
-        // Cari data berdasarkan UUID, jika tidak ditemukan langsung lempar error 404
-        $asset = Asset::with(['category', 'location'])->where('uuid', $uuid)->firstOrFail();
+        // Cari data berdasarkan UUID yang valid, jika tidak ditemukan langsung lempar error 404
+        $asset = Asset::with(['category', 'location'])
+            ->whereNotNull('uuid')
+            ->where('uuid', $uuid)
+            ->firstOrFail();
     
         return response()->json([
             'asset_code' => $asset->asset_code,
@@ -110,6 +119,64 @@ class AssetController extends Controller
         return response()->json([
             'message' => 'Success',
             'data' => new AssetDetailResource($asset)
+        ], 200);
+    }
+
+    /**
+     * Memperbarui informasi aset inventaris yang ada.
+     */
+    public function update(UpdateAssetRequest $request, int $id): JsonResponse
+    {
+        $asset = Asset::findOrFail($id);
+
+        $asset->update($request->validated());
+
+        ActivityLogger::log(
+            'update_asset',
+            "Memperbarui data aset inventaris: {$asset->name}",
+            $asset,
+            ['asset_code' => $asset->asset_code]
+        );
+
+        $asset->load(['category', 'location']);
+        Cache::forget('dashboard_stats');
+
+        return response()->json([
+            'message' => 'Aset berhasil diperbarui',
+            'data' => new AssetResource($asset)
+        ], 200);
+    }
+
+    /**
+     * Menghapus aset (Soft Delete).
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $asset = Asset::findOrFail($id);
+
+        // Validasi perlindungan: aset sedang dipinjam tidak boleh dihapus
+        if ($asset->status === 'borrowed' || $asset->borrowings()->whereNull('returned_at')->exists()) {
+            return response()->json([
+                'message' => 'Aset tidak dapat dihapus karena sedang dalam masa peminjaman aktif.'
+            ], 422);
+        }
+
+        $assetName = $asset->name;
+        $assetCode = $asset->asset_code;
+
+        $asset->delete();
+
+        ActivityLogger::log(
+            'delete_asset',
+            "Menghapus aset inventaris: {$assetName} ({$assetCode})",
+            $asset,
+            ['asset_code' => $assetCode]
+        );
+
+        Cache::forget('dashboard_stats');
+
+        return response()->json([
+            'message' => 'Aset berhasil dihapus'
         ], 200);
     }
 }

@@ -1,0 +1,99 @@
+name: assets-management
+
+services:
+  # =========================================================
+  # FRONTEND (React + Vite) -> http://localhost:2000
+  # =========================================================
+  frontend:
+    build:
+      context: ./asset-management-web
+      dockerfile: Dockerfile.dev
+      args:
+        VITE_API_URL: http://localhost:2020/api
+    container_name: asset-web
+    ports:
+      - "2000:5173"
+    volumes:
+      - ./asset-management-web:/app
+      - /app/node_modules
+    depends_on:
+      - app
+    networks:
+      - asset-network
+    restart: unless-stopped
+
+  # =========================================================
+  # BACKEND Nginx (Laravel API) -> http://localhost:2020
+  # =========================================================
+  nginx:
+    image: nginx:alpine
+    container_name: asset-nginx
+    ports:
+      - "2020:80"
+    volumes:
+      - ./assets-management-api:/var/www/asset-management-api
+      - ./assets-management-api/docker/nginx:/etc/nginx/conf.d
+    networks:
+      - asset-network
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  # =========================================================
+  # BACKEND PHP-FPM (Laravel)
+  # =========================================================
+  app:
+    build:
+      context: ./assets-management-api
+      dockerfile: docker/Dockerfile
+    container_name: asset-app
+    volumes:
+      - ./assets-management-api:/var/www/asset-management-api
+      - ./assets-management-api/docker/php/opcache.ini:/usr/local/etc/php/conf.d/docker-php-ext-opcache.ini:ro
+      - ./assets-management-api/docker/php/custom.ini:/usr/local/etc/php/conf.d/custom.ini:ro
+      - ./assets-management-api/docker/start.sh:/usr/local/bin/start.sh:ro
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_DATABASE: asset_management
+      DB_USERNAME: asset_user
+      DB_PASSWORD: asset_secret
+    networks:
+      - asset-network
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # =========================================================
+  # DATABASE MySQL 8 -> localhost:3306
+  # =========================================================
+  db:
+    image: mysql:8.0
+    container_name: asset-db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_DATABASE: asset_management
+      MYSQL_USER: asset_user
+      MYSQL_PASSWORD: asset_secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - asset-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_secret"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+networks:
+  asset-network:
+    driver: bridge
+
+volumes:
+  mysqldata:
+    driver: local

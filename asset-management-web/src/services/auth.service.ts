@@ -13,8 +13,14 @@ export const authService = {
   },
 
   logout: async (): Promise<void> => {
-    removeToken();
-    window.location.href = '/login';
+    try {
+      await api.post('/logout');
+    } catch (err) {
+      console.warn('Gagal mencabut sesi token di server:', err);
+    } finally {
+      removeToken();
+      window.location.href = '/login';
+    }
   },
 
   // Perbarui tipe data respons agar mengembalikan data profil, role, dan permission lengkap

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetLocation;
 use App\Http\Requests\StoreAssetLocationRequest;
+use App\Http\Requests\UpdateAssetLocationRequest;
 use App\Http\Resources\AssetLocationResource;
 use Illuminate\Http\JsonResponse;
 use App\Services\ActivityLogger;
@@ -62,6 +63,46 @@ class AssetLocationController extends Controller
             'message' => 'Success',
             'data' => new AssetLocationResource($location)
         ], 201);
+    }
 
+    /**
+     * Memperbarui data lokasi fisik aset.
+     */
+    public function update(UpdateAssetLocationRequest $request, int $id): JsonResponse
+    {
+        $location = AssetLocation::findOrFail($id);
+
+        $location->update($request->validated());
+
+        ActivityLogger::log('update_location', "Memperbarui lokasi aset: {$location->name} ({$location->code})", $location);
+
+        return response()->json([
+            'message' => 'Lokasi berhasil diperbarui',
+            'data' => new AssetLocationResource($location)
+        ], 200);
+    }
+
+    /**
+     * Menghapus data lokasi fisik aset (Soft Delete).
+     */
+    public function destroy(int $id): JsonResponse
+    {
+        $location = AssetLocation::findOrFail($id);
+
+        if ($location->assets()->exists()) {
+            return response()->json([
+                'message' => 'Lokasi tidak dapat dihapus karena masih digunakan oleh aset yang terdaftar.'
+            ], 422);
+        }
+
+        $locationName = $location->name;
+        $locationCode = $location->code;
+        $location->delete();
+
+        ActivityLogger::log('delete_location', "Menghapus lokasi aset: {$locationName} ({$locationCode})", $location);
+
+        return response()->json([
+            'message' => 'Lokasi berhasil dihapus'
+        ], 200);
     }
 }

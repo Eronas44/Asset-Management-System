@@ -61,7 +61,7 @@ class BackupController extends Controller
         }
 
         // Ambil path absolut file dari storage lokal laravel
-        $absolutePath = storage_path('app/backups/' . $filename);
+        $absolutePath = Storage::disk('local')->path('backups/' . $filename);
 
         if (!file_exists($absolutePath)) {
             return response()->json(['message' => 'File tidak ditemukan.'], 404);

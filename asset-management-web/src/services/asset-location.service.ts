@@ -11,5 +11,17 @@ export const assetLocationService = {
   // Menambahkan lokasi aset baru
   create: async (payload: CreateAssetLocationPayload): Promise<void> => {
     await api.post('/asset-locations', payload);
+  },
+
+  // Memperbarui lokasi aset
+  update: async (id: number, payload: Partial<CreateAssetLocationPayload>): Promise<AssetLocation> => {
+    const response = await api.put<{ data: AssetLocation }>(`/asset-locations/${id}`, payload);
+    return response.data.data;
+  },
+
+  // Menghapus lokasi aset (Soft delete)
+  delete: async (id: number): Promise<{ message: string }> => {
+    const response = await api.delete<{ message: string }>(`/asset-locations/${id}`);
+    return response.data;
   }
 };

@@ -2,27 +2,60 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --color-warm-cream: #FAF7F2;
+  --color-warm-stone: #E6E1D6;
+  --color-warm-divider: #EFECE6;
+  --color-warm-header: #F4F0EA;
+  --color-deep-petrol: #2B4C6F;
+  --color-estate-navy: #1E3A5F;
+  --color-marigold: #F4B752;
+  --color-dark-navy: #111822;
+  --color-slate-navy: #1A2433;
+}
+
 @layer base {
-	html {
-		font-size: 13px;
-		color-scheme: light;
-	}
+  :root {
+    --bg-primary: #FAF7F2;
+    --text-primary: #334155;
+    --card-bg: #FFFFFF;
+    --card-border: #E6E1D6;
+    color-scheme: light;
+  }
 
-	@media (min-width: 640px) {
-		html {
-			font-size: 14px;
-		}
-	}
+  html.dark {
+    --bg-primary: #111822;
+    --text-primary: #FAF7F2;
+    --card-bg: #1A2433;
+    --card-border: #2A374A;
+    color-scheme: dark;
+  }
 
-	html.dark {
-		color-scheme: dark;
-	}
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply antialiased transition-colors duration-200;
+  }
+}
 
-	body {
-		@apply bg-slate-50 text-slate-900 antialiased transition-colors duration-300;
-	}
+/* Tactile SaaS Card utilities */
+.tactile-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E6E1D6;
+}
 
-	html.dark body {
-		@apply bg-slate-950 text-slate-100;
-	}
+.dark .tactile-card {
+  background-color: #1A2433;
+  border: 1px solid #2A374A;
+}
+
+/* Landscape mobile helpers */
+@media (orientation: landscape) and (max-width: 1023px) {
+  .landscape-condensed-hud {
+    height: 3rem !important;
+  }
+  .landscape-content-pad {
+    padding-left: 5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
 }

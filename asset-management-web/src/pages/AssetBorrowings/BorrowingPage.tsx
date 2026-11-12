@@ -1,16 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { assetBorrowingService } from '../../services/asset-borrowing.service';
 import { assetService } from '../../services/asset.service';
-import { useAuth } from '../../context/AuthContext';
 import type { AssetBorrowing } from '../../types/asset-borrowing';
 import type { Asset } from '../../types/asset';
-import { Plus, Handshake, CheckCircle2, AlertCircle, ArrowLeftRight } from 'lucide-react';
+import { Plus, Handshake, CheckCircle2, AlertCircle, ArrowLeftRight, Clock3 } from 'lucide-react';
 import Modal from '../../components/ui/Modal';
+import { useToast } from '../../components/Feedback/ToastContext';
+import { ConfirmDialog } from '../../components/ui/ConfirmDialog';
 
 const BorrowingPage: React.FC = () => {
-  const { user } = useAuth();
+  const toast = useToast();
+  const [searchParams] = useSearchParams();
   const [borrowings, setBorrowings] = useState<AssetBorrowing[]>([]);
   const [availableAssets, setAvailableAssets] = useState<Asset[]>([]);
+
+  // State konfirmasi pengembalian aset
+  const [returningItem, setReturningItem] = useState<AssetBorrowing | null>(null);
 
   // Form State
   const [assetId, setAssetId] = useState<number | ''>('');
@@ -42,7 +48,6 @@ const BorrowingPage: React.FC = () => {
     });
   }, [assetSearch, availableAssets]);
 
-  // Fungsi tersentralisasi untuk memuat ulang seluruh data komponen
   const loadPageData = async () => {
     try {
       const [borrowingsData, assetsData] = await Promise.all([
@@ -51,7 +56,6 @@ const BorrowingPage: React.FC = () => {
       ]);
       setBorrowings(borrowingsData);
       setAvailableAssets(assetsData.data || []);
-
     } catch (err) {
       console.error('Gagal memuat data transaksi peminjaman:', err);
     } finally {
@@ -63,7 +67,17 @@ const BorrowingPage: React.FC = () => {
     loadPageData();
   }, []);
 
-  // Fungsi menangani submit form peminjaman baru
+  useEffect(() => {
+    const borrowAssetId = searchParams.get('borrowAssetId');
+    if (borrowAssetId) {
+      const parsedId = Number(borrowAssetId);
+      if (!isNaN(parsedId) && parsedId > 0) {
+        setAssetId(parsedId);
+        setIsCreateModalOpen(true);
+      }
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
@@ -96,7 +110,9 @@ const BorrowingPage: React.FC = () => {
         notes
       });
 
-      setMessage({ text: 'Transaksi peminjaman berhasil diproses!', isError: false });
+      const successMsg = 'Transaksi peminjaman berhasil diproses!';
+      setMessage({ text: successMsg, isError: false });
+      toast.success(successMsg);
       
       setAssetId('');
       setBorrowerName('');
@@ -108,180 +124,255 @@ const BorrowingPage: React.FC = () => {
       loadPageData();
     } catch (err: any) {
       console.error(err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setMessage({ text: err.response.data.message, isError: true });
-      } else {
-        setMessage({ text: 'Gagal memproses peminjaman aset.', isError: true });
-      }
+      const errMsg = err.response?.data?.message || 'Gagal memproses peminjaman aset.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  // Fungsi menangani aksi klik tombol pengembalian aset
-  const handleReturn = async (id: number) => {
-    if (!window.confirm('Apakah Anda yakin ingin memproses pengembalian aset ini?')) return;
+  const handleInitiateReturn = (item: AssetBorrowing) => {
+    setReturningItem(item);
+  };
+
+  const handleConfirmReturn = async () => {
+    if (!returningItem) return;
     
     setMessage(null);
-    setActionLoadingId(id);
+    setActionLoadingId(returningItem.id);
 
     try {
-      await assetBorrowingService.markAsReturned(id);
-      setMessage({ text: 'Aset sukses dikembalikan, status inventaris telah diperbarui!', isError: false });
-      
-      // Strategi arsitektur terpusat: refresh data setelah aksi berhasil
+      await assetBorrowingService.markAsReturned(returningItem.id);
+      const successMsg = `Aset "${returningItem.asset?.name}" telah sukses dikembalikan ke inventaris!`;
+      setMessage({ text: successMsg, isError: false });
+      toast.success(successMsg);
+      setReturningItem(null);
       loadPageData();
     } catch (err: any) {
       console.error(err);
-      if (err.response && err.response.data && err.response.data.message) {
-        setMessage({ text: err.response.data.message, isError: true });
-      } else {
-        setMessage({ text: 'Gagal memproses pengembalian aset.', isError: true });
-      }
+      const errMsg = err.response?.data?.message || 'Gagal memperbarui status pengembalian.';
+      setMessage({ text: errMsg, isError: true });
+      toast.error(errMsg);
     } finally {
       setActionLoadingId(null);
     }
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 font-sans text-slate-800 dark:text-slate-100">
+    <div className="space-y-6 font-sans text-slate-800 dark:text-slate-100">
       
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-[#E6E1D6] pb-5 dark:border-slate-800">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-gray-800 dark:text-white">Modul Peminjaman & Pengembalian Aset</h2>
-          <p className="mt-1 text-gray-500 dark:text-slate-400">Kelola transaksi sirkulasi peminjaman aset inventaris.</p>
-          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-            Disimpan atas nama user login: <span className="font-semibold text-slate-700 dark:text-slate-200">{user?.name || '-'}</span>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl font-bold tracking-tight text-[#2B4C6F] dark:text-[#FAF7F2]">
+              Sirkulasi & Peminjaman Aset
+            </h1>
+            <span className="rounded-full bg-[#F4B752] px-2.5 py-0.5 text-xs font-semibold text-slate-900">
+              Sirkulasi Aktif
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            Pusat monitoring peminjaman dinas, penanggung jawab operasional, dan pengembalian unit inventaris.
           </p>
         </div>
+
         <button
           type="button"
           onClick={() => setIsCreateModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-5 py-3 font-medium text-white transition-colors hover:bg-amber-600"
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-4 py-2.5 text-xs font-semibold tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]/30 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
         >
-          <Plus size={18} /> Peminjaman Baru
+          <Plus size={16} strokeWidth={2.5} />
+          <span>+ Peminjaman Baru</span>
         </button>
       </div>
 
       {message && (
-        <div className={`rounded-xl border px-4 py-3 text-sm flex items-start gap-3 ${
-          message.isError ? 'border-red-100 bg-red-50 text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-100' : 'border-emerald-100 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100'
-        }`}>
-          <div className="mt-0.5">
-            {message.isError ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
+        <div
+          className={`flex items-start gap-3 rounded-xl border p-4 text-xs transition-all ${
+            message.isError
+              ? 'border-rose-500/30 bg-rose-50/80 text-rose-900 dark:border-rose-500/25 dark:bg-rose-950/30 dark:text-rose-200'
+              : 'border-emerald-500/30 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/25 dark:bg-emerald-950/30 dark:text-emerald-200'
+          }`}
+        >
+          <div className="mt-0.5 shrink-0">
+            {message.isError ? <AlertCircle size={15} /> : <CheckCircle2 size={15} />}
           </div>
-          <p>{message.text}</p>
+          <p className="leading-relaxed font-medium">{message.text}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
-        <div className="xl:col-span-1 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="mb-6 flex items-center gap-2">
-            <div className="rounded-lg bg-amber-50 p-2 text-amber-600">
-              <Plus size={20} />
-            </div>
-            <h4 className="text-lg font-bold text-gray-800 dark:text-white">Form Peminjaman Baru</h4>
+      {/* Tabel Log Transaksi Peminjaman */}
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-[#E6E1D6] bg-white dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
+        
+        {/* Table Top Toolbar */}
+        <div className="flex items-center justify-between border-b border-[#E6E1D6] p-4 dark:border-slate-800 bg-[#FAF7F2]/40 dark:bg-[#151D2A]/40">
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
+              Riwayat Sirkulasi Unit
+            </h2>
+            <span className="rounded-md border border-[#E6E1D6] bg-[#FAF7F2] px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-300">
+              {borrowings.length} Transaksi
+            </span>
           </div>
-
-          <p className="text-sm leading-6 text-gray-500 dark:text-slate-400">
-            Buka modal lebar untuk input peminjaman baru, agar detail aset, jadwal, dan catatan lebih lega diisi.
-          </p>
-          <button
-            type="button"
-            onClick={() => setIsCreateModalOpen(true)}
-            className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 font-medium text-white transition-colors hover:bg-amber-600"
-          >
-            <CheckCircle2 size={18} /> Proses Peminjaman
-          </button>
+          <div className="flex items-center gap-1.5 font-mono text-xs text-slate-500 dark:text-slate-400">
+            <Clock3 size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+            <span>Pencatatan Terpadu</span>
+          </div>
         </div>
 
-        {/* Tabel Log Riwayat Transaksi */}
-        <div className="xl:col-span-2 flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-slate-800">
-            <h4 className="text-lg font-bold text-gray-800 dark:text-white">Riwayat Transaksi & Aksi Pengembalian</h4>
-            <div className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm text-gray-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
-              Total: {borrowings.length}
+        {/* Table Content */}
+        <div className="flex-1 overflow-x-auto">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 dark:text-slate-500">
+              <div className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A5F] dark:border-slate-700 dark:border-t-[#F4B752]" />
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Memuat berkas catatan sirkulasi...</p>
             </div>
-          </div>
+          ) : borrowings.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] text-slate-500 dark:border-slate-800 dark:bg-[#111822] dark:text-slate-400">
+                <Handshake size={22} />
+              </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider text-[#2B4C6F] dark:text-[#FAF7F2]">
+                Belum Ada Catatan Peminjaman
+              </h3>
+              <p className="mt-1 max-w-sm text-xs text-slate-500 dark:text-slate-400">
+                Saat ini belum ada data pergerakan unit atau seluruh aset berada pada lokasi penyimpanan aman.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Tampilan Kartu Khusus Layar Mobile (< md) */}
+              <div className="md:hidden space-y-3 p-4">
+                {borrowings.map((b) => (
+                  <div key={b.id} className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#151D2A] shadow-2xs space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
+                          {b.asset?.name || <span className="text-rose-600 italic">Aset Telah Dihapus</span>}
+                        </h4>
+                        <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
+                          {b.asset?.asset_code}
+                        </span>
+                      </div>
+                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${
+                        b.returned_at 
+                          ? 'border-emerald-800/20 bg-emerald-50/80 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-950/40 dark:text-emerald-300' 
+                          : 'border-amber-800/20 bg-amber-50/80 text-amber-800 dark:border-amber-500/20 dark:bg-amber-950/40 dark:text-amber-300'
+                      }`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+                        <span>{b.returned_at ? 'Dikembalikan' : 'Dipinjam'}</span>
+                      </span>
+                    </div>
 
-          <div className="flex-1 overflow-x-auto">
-            {loading ? (
-              <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500 dark:text-slate-400">
-                <div className="w-8 h-8 border-4 border-amber-100 border-t-amber-500 rounded-full animate-spin mb-4"></div>
-                <p>Memuat riwayat peminjaman...</p>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 bg-[#FAF7F2]/70 dark:bg-[#111822]/60 p-3 rounded-xl border border-[#E6E1D6] dark:border-slate-800 space-y-1.5">
+                      <div>
+                        <span className="text-slate-400">Peminjam:</span> <span className="font-semibold text-slate-800 dark:text-slate-200">{b.borrower_name}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-[10px] font-mono pt-1.5 border-t border-[#E6E1D6] dark:border-slate-800">
+                        <div>
+                          <span className="block text-slate-400">Pinjam:</span>
+                          <span className="text-slate-700 dark:text-slate-300">{b.borrowed_at}</span>
+                        </div>
+                        <div>
+                          <span className="block text-slate-400">Batas:</span>
+                          <span className="text-slate-700 dark:text-slate-300">{b.expected_return_at}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end pt-1">
+                      {!b.returned_at ? (
+                        <button 
+                          onClick={() => handleInitiateReturn(b)}
+                          disabled={actionLoadingId === b.id}
+                          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200"
+                        >
+                          <ArrowLeftRight size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                          <span>Tutup & Kembalikan</span>
+                        </button>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 font-mono text-[11px] text-emerald-700 dark:text-emerald-400">
+                          <CheckCircle2 size={14} />
+                          <span>Selesai Dikembalikan</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ) : borrowings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-12 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-50 text-gray-400 dark:bg-slate-800 dark:text-slate-500">
-                  <Handshake size={32} />
-                </div>
-                <h3 className="mb-1 text-lg font-medium text-gray-800 dark:text-white">Belum ada transaksi</h3>
-                <p className="max-w-sm text-gray-500 dark:text-slate-400">Belum ada rekaman transaksi peminjaman. Silakan proses form di samping untuk membuat transaksi baru.</p>
-              </div>
-            ) : (
-              <table className="w-full text-left text-sm text-gray-600 dark:text-slate-300">
-                <thead className="border-b border-gray-200 bg-gray-50 font-semibold text-gray-700 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-200">
+
+              {/* Tampilan Tabel Standar Desktop & Tablet (>= md) */}
+              <table className="hidden md:table w-full text-left text-xs text-slate-700 dark:text-slate-300">
+                <thead className="bg-[#F4F0EA] text-[#2B4C6F] border-b border-[#E6E1D6] text-[11px] font-semibold uppercase tracking-wider dark:bg-[#151D2A] dark:text-[#FAF7F2] dark:border-b dark:border-slate-800">
                   <tr>
-                    <th className="px-6 py-4 whitespace-nowrap">Nama Aset</th>
-                    <th className="px-6 py-4">Peminjam</th>
-                    <th className="px-6 py-4">Tanggal Pinjam</th>
-                    <th className="px-6 py-4">Rencana Kembali</th>
-                    <th className="px-6 py-4 whitespace-nowrap">Status Log</th>
-                    <th className="px-6 py-4 text-center">Aksi</th>
+                    <th className="px-5 py-3 whitespace-nowrap">Aset Inventaris</th>
+                    <th className="px-5 py-3">Nama Peminjam</th>
+                    <th className="px-5 py-3 whitespace-nowrap">Waktu Pinjam</th>
+                    <th className="px-5 py-3 whitespace-nowrap">Rencana Pengembalian</th>
+                    <th className="px-5 py-3 whitespace-nowrap">Status Siklus</th>
+                    <th className="px-5 py-3 text-center whitespace-nowrap">Tindakan</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-[#EFECE6] dark:divide-slate-800/80">
                   {borrowings.map((b) => (
-                    <tr key={b.id} className="group transition-colors hover:bg-gray-50/80 dark:hover:bg-slate-800/70">
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-gray-800 transition-colors group-hover:text-amber-600 dark:text-white dark:group-hover:text-amber-300">
-                          {b.asset?.name || <span className="text-red-500 italic">Aset Terhapus</span>}
+                    <tr key={b.id} className="hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100">
+                          {b.asset?.name || <span className="text-rose-600 italic">Aset Telah Dihapus</span>}
                         </div>
-                        <div className="mt-0.5 font-mono text-xs text-gray-500 dark:text-slate-400">{b.asset?.asset_code}</div>
+                        <div className="mt-0.5 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                          {b.asset?.asset_code}
+                        </div>
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-700 dark:text-slate-200">{b.borrower_name}</td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-slate-400">
+                      <td className="px-5 py-3.5 font-medium text-slate-800 dark:text-slate-200">
+                        {b.borrower_name}
+                        {b.borrowed_by_user_name && (
+                          <div className="mt-0.5 text-[10px] text-slate-400">
+                            Dicatat: {b.borrowed_by_user_name}
+                          </div>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-3.5 font-mono text-slate-600 dark:text-slate-400">
                         {b.borrowed_at}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-gray-500 dark:text-slate-400">
+                      <td className="whitespace-nowrap px-5 py-3.5 font-mono text-slate-600 dark:text-slate-400">
                         {b.expected_return_at}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${
-                          b.returned_at ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100' : 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-100'
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-medium tracking-wide uppercase ${
+                          b.returned_at 
+                            ? 'border-emerald-800/20 bg-emerald-50/80 text-emerald-800 dark:border-emerald-500/20 dark:bg-emerald-950/40 dark:text-emerald-300' 
+                            : 'border-amber-800/20 bg-amber-50/80 text-amber-800 dark:border-amber-500/20 dark:bg-amber-950/40 dark:text-amber-300'
                         }`}>
-                          {b.returned_at ? 'Dikembalikan' : 'Dipinjam'}
+                          <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
+                          <span>{b.returned_at ? 'Dikembalikan' : 'Sedang Dipinjam'}</span>
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <td className="px-5 py-3.5 whitespace-nowrap text-center">
                         {!b.returned_at ? (
                           <button 
-                            onClick={() => handleReturn(b.id)}
+                            onClick={() => handleInitiateReturn(b)}
                             disabled={actionLoadingId === b.id}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-600 focus:ring-2 focus:ring-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E6E1D6] bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-2xs transition-colors hover:bg-[#FAF7F2] hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-200 dark:hover:bg-slate-800"
                           >
                             {actionLoadingId === b.id ? (
                               <>
-                                <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>...</span>
+                                <div className="h-3 w-3 animate-spin rounded-full border-2 border-slate-400 border-t-[#1E3A5F] dark:border-slate-500 dark:border-t-[#F4B752]" />
+                                <span>Memproses...</span>
                               </>
                             ) : (
                               <>
-                                <ArrowLeftRight size={14} />
-                                Kembalikan
+                                <ArrowLeftRight size={13} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                                <span>Tutup & Kembalikan</span>
                               </>
                             )}
                           </button>
                         ) : (
-                          <div className="inline-flex items-center justify-center gap-1 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-sm font-bold text-emerald-600 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-100">
-                            <CheckCircle2 size={14} />
-                            Selesai
-                          </div>
-                        )}
-                        {b.borrowed_by_user_name && (
-                          <div className="mt-2 text-[10px] text-slate-500 dark:text-slate-400">
-                            Input oleh: <span className="font-semibold text-slate-700 dark:text-slate-200">{b.borrowed_by_user_name}</span>
+                          <div className="inline-flex items-center gap-1 font-mono text-[11px] text-emerald-700 dark:text-emerald-400">
+                            <CheckCircle2 size={13} />
+                            <span>Selesai</span>
                           </div>
                         )}
                       </td>
@@ -289,36 +380,36 @@ const BorrowingPage: React.FC = () => {
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
+            </>
+          )}
         </div>
-
       </div>
 
+      {/* Modal Form Registrasi Peminjaman */}
       <Modal
         open={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        title="Form Peminjaman Baru"
-        description="Gunakan modal lebar ini untuk menginput transaksi peminjaman secara lengkap."
-        maxWidthClassName="max-w-4xl"
+        title="Form Registrasi Peminjaman"
+        description="Pilih aset tersedia dan tetapkan peminjam serta batas waktu pengembalian."
+        maxWidthClassName="max-w-3xl"
       >
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">
-              Pilih Aset (Hanya status Available) <span className="text-red-500">*</span>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="sm:col-span-2">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Pilih Aset Tersedia <span className="text-rose-600 dark:text-rose-400">*</span>
             </label>
             <input
               type="text"
               value={assetSearch}
               onChange={(e) => setAssetSearch(e.target.value)}
-              placeholder="Cari aset berdasarkan nama, kode, kategori, atau lokasi..."
-              className="mb-3 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-800 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              placeholder="Cari berdasarkan nama aset, kode inventaris, atau kategori..."
+              className="mb-2.5 w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
-            <div className="max-h-56 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50 p-2 dark:border-slate-700 dark:bg-slate-800">
+            <div className="max-h-48 overflow-y-auto rounded-xl border border-[#E6E1D6] bg-white p-2 dark:border-slate-700 dark:bg-[#111822]">
               {filteredAvailableAssets.length === 0 ? (
-                <div className="px-3 py-4 text-sm text-gray-500 dark:text-slate-400">Tidak ada aset yang cocok.</div>
+                <div className="px-3 py-3 text-xs text-slate-400">Tidak ada aset tersedia yang sesuai pencarian.</div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {filteredAvailableAssets.map((asset) => {
                     const selected = assetId === asset.id;
                     return (
@@ -326,17 +417,20 @@ const BorrowingPage: React.FC = () => {
                         key={asset.id}
                         type="button"
                         onClick={() => setAssetId(asset.id)}
-                        className={`w-full rounded-lg border px-3 py-2 text-left transition-colors ${selected ? 'border-amber-500 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-500/10 dark:text-amber-100' : 'border-transparent bg-white text-gray-700 hover:border-amber-200 hover:bg-amber-50 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-amber-500/20 dark:hover:bg-slate-700'}`}
+                        className={`w-full rounded-lg border px-3 py-2 text-left transition-all ${
+                          selected 
+                            ? 'border-[#1E3A5F] bg-[#1E3A5F] text-[#FAF7F2] font-medium' 
+                            : 'border-[#E6E1D6] bg-white text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-800 dark:bg-[#1A2433] dark:text-slate-200 dark:hover:bg-slate-800'
+                        }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <div className="font-semibold">{asset.name}</div>
-                            <div className="mt-0.5 text-xs text-gray-500 dark:text-slate-400">{asset.asset_code}</div>
-                            <div className="mt-1 text-xs text-gray-500 dark:text-slate-400">
-                              {asset.category?.name || '-'} · {asset.location?.name || '-'}
+                            <div className="font-semibold text-xs leading-snug">{asset.name}</div>
+                            <div className={`mt-0.5 font-mono text-[10px] ${selected ? 'text-[#F4B752]' : 'text-slate-400'}`}>
+                              {asset.asset_code} · {asset.category?.name || '-'} · {asset.location?.name || '-'}
                             </div>
                           </div>
-                          {selected && <CheckCircle2 size={16} className="mt-0.5 text-amber-600 dark:text-amber-300" />}
+                          {selected && <CheckCircle2 size={16} className="mt-0.5 text-[#F4B752]" />}
                         </div>
                       </button>
                     );
@@ -344,61 +438,65 @@ const BorrowingPage: React.FC = () => {
                 </div>
               )}
             </div>
-            <p className="mt-2 text-xs text-gray-500 dark:text-slate-400">
-              {assetId ? 'Aset terpilih. Tanggal dan waktu pinjam akan diisi otomatis saat proses disimpan.' : 'Pilih satu aset dari daftar di atas.'}
-            </p>
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">
-              Nama Peminjam <span className="text-red-500">*</span>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Nama Lengkap Peminjam <span className="text-rose-600 dark:text-rose-400">*</span>
             </label>
             <input
               type="text"
               value={borrowerName}
               onChange={(e) => setBorrowerName(e.target.value)}
               required
-              placeholder="Masukkan nama karyawan"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-800 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              placeholder="Contoh: Budi Santoso (Divisi Operasional)"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">
-              Rencana Tanggal Pengembalian <span className="text-red-500">*</span>
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Rencana Waktu Pengembalian <span className="text-rose-600 dark:text-rose-400">*</span>
             </label>
             <input
               type="datetime-local"
               value={expectedReturnAt}
               onChange={(e) => setExpectedReturnAt(e.target.value)}
               required
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-800 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              className="w-full rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
-          <div className="md:col-span-2">
-            <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-slate-200">
-              Catatan / Keterangan Keperluan
+          <div className="sm:col-span-2">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Keperluan & Catatan Peminjaman
             </label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Tulis alasan peminjaman..."
-              rows={4}
-              className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-gray-800 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              placeholder="Jelaskan kebutuhan operasional dan kondisi unit saat diserahkan..."
+              rows={3}
+              className="w-full resize-none rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/60 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-[#1E3A5F] focus:bg-white focus:ring-2 focus:ring-[#1E3A5F]/20 dark:border-slate-700 dark:bg-[#111822] dark:text-slate-100 dark:focus:border-[#F4B752]"
             />
           </div>
-          <div className="md:col-span-2">
+          <div className="flex items-center justify-end gap-3 pt-3 sm:col-span-2 border-t border-[#E6E1D6] dark:border-slate-800">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="rounded-xl border border-[#E6E1D6] bg-white px-4 py-2 text-xs font-medium text-slate-700 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors min-h-[44px]"
+            >
+              Batal
+            </button>
             <button
               type="submit"
               disabled={submitLoading}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 font-medium text-white transition-colors hover:bg-amber-600 focus:ring-4 focus:ring-amber-500/20 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-[#1E3A5F] px-5 py-2 text-xs font-semibold uppercase tracking-wider text-[#FAF7F2] shadow-xs transition-all hover:bg-[#162D4A] active:scale-95 focus:ring-2 focus:ring-[#1E3A5F]/30 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[#1E3A5F] dark:hover:bg-[#25456f]"
             >
               {submitLoading ? (
                 <>
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                   <span>Memproses...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 size={18} />
+                  <CheckCircle2 size={15} />
                   <span>Proses Peminjaman</span>
                 </>
               )}
@@ -406,6 +504,19 @@ const BorrowingPage: React.FC = () => {
           </div>
         </form>
       </Modal>
+
+      {/* Dialog Konfirmasi Pengembalian Aset */}
+      <ConfirmDialog
+        isOpen={returningItem !== null}
+        title="Konfirmasi Pengembalian Aset"
+        message={`Apakah Anda yakin ingin memproses pengembalian unit "${returningItem?.asset?.name}" yang dipinjam oleh ${returningItem?.borrower_name}?\n\nStatus inventaris unit akan otomatis dipulihkan menjadi Tersedia.`}
+        confirmLabel="Konfirmasi Pengembalian"
+        cancelLabel="Batal"
+        variant="info"
+        isLoading={actionLoadingId !== null}
+        onConfirm={handleConfirmReturn}
+        onCancel={() => setReturningItem(null)}
+      />
     </div>
   );
 };
