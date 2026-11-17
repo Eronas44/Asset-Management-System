@@ -50,11 +50,32 @@ class Asset extends Model
         'residual_value',
         'status',
         'notes',
+        'image',
+    ];
+
+    protected $appends = [
+        'image_url',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        // Jika sudah berupa URL absolut atau data URI base64
+        if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://') || str_starts_with($this->image, 'data:')) {
+            return $this->image;
+        }
+
+        // Jika path relatif (misal: assets/uuid.jpg)
+        $baseUrl = rtrim(env('APP_URL', 'http://localhost:2020'), '/');
+        return $baseUrl . '/storage/' . ltrim($this->image, '/');
+    }
 
     public static function typeOptions(): array
     {

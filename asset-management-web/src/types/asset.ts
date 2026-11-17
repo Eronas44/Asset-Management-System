@@ -52,6 +52,8 @@ export interface Asset {
   qr_code_url?: string;
   status: AssetStatus;
   notes: string | null;
+  image?: string | null;
+  image_url?: string | null;
   asset_category_id?: number;
   asset_location_id?: number;
   category?: AssetCategory;
@@ -75,4 +77,6 @@ export interface CreateAssetPayload {
   residual_value: number;      // Tambahkan ini
   status: AssetStatus;
   notes?: string;
+  image?: string | null;
+  remove_image?: boolean;
 }

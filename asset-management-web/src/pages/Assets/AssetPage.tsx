@@ -14,7 +14,8 @@ import { useAuth } from '../../context/AuthContext';
 import { 
   Package, Plus, CheckCircle2, AlertCircle, Search, Filter, 
   FileText, FileSpreadsheet, ChevronLeft, ChevronRight, 
-  ExternalLink, Eye, Info, Pencil, Trash2, Printer
+  ExternalLink, Eye, Info, Pencil, Trash2, Printer,
+  Image as ImageIcon, Upload, X
 } from 'lucide-react';
 import { useDebounce } from '../../utils/useDebounce';
 import { useToast } from '../../components/Feedback/ToastContext';
@@ -146,6 +147,8 @@ const AssetPage: React.FC = () => {
   const [residualValue, setResidualValue] = useState<number>(0);
   const [status, setStatus] = useState<AssetStatus>('tersedia');
   const [notes, setNotes] = useState('');
+  const [image, setImage] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [exportLoading, setExportLoading] = useState<{ csv: boolean; pdf: boolean }>({ csv: false, pdf: false });
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -164,6 +167,9 @@ const AssetPage: React.FC = () => {
   const [editResidualValue, setEditResidualValue] = useState<number>(0);
   const [editStatus, setEditStatus] = useState<AssetStatus>('tersedia');
   const [editNotes, setEditNotes] = useState('');
+  const [editImage, setEditImage] = useState<string | null>(null);
+  const [editImagePreview, setEditImagePreview] = useState<string | null>(null);
+  const [editRemoveImage, setEditRemoveImage] = useState(false);
 
   // Modal State untuk Cetak Label QR
   const [isSelectPrintModalOpen, setIsSelectPrintModalOpen] = useState(false);
@@ -282,6 +288,58 @@ const AssetPage: React.FC = () => {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('File harus berupa format gambar (JPEG, PNG, WEBP).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran gambar maksimal 5 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setImage(base64);
+      setImagePreview(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
+
+  const handleEditImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('File harus berupa format gambar (JPEG, PNG, WEBP).');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Ukuran gambar maksimal 5 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setEditImage(base64);
+      setEditImagePreview(base64);
+      setEditRemoveImage(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveEditImage = () => {
+    setEditImage(null);
+    setEditImagePreview(null);
+    setEditRemoveImage(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage(null);
@@ -314,7 +372,8 @@ const AssetPage: React.FC = () => {
         useful_life_years: Number(usefulLifeYears),
         residual_value: Number(residualValue),
         status,
-        notes
+        notes,
+        image: image || undefined
       });
 
       setMessage({ text: 'Aset baru berhasil ditambahkan!', isError: false });
@@ -330,6 +389,8 @@ const AssetPage: React.FC = () => {
       setPurchasePrice(0);
       setStatus('tersedia');
       setNotes('');
+      setImage(null);
+      setImagePreview(null);
       setIsCreateModalOpen(false);
 
       fetchAssetsData();
@@ -381,6 +442,9 @@ const AssetPage: React.FC = () => {
     setEditResidualValue(Number(asset.residual_value) || 0);
     setEditStatus((asset.status as AssetStatus) || 'tersedia');
     setEditNotes(asset.notes || '');
+    setEditImage(null);
+    setEditImagePreview(asset.image_url || null);
+    setEditRemoveImage(false);
     setMessage(null);
     setIsEditModalOpen(true);
   };
@@ -418,7 +482,9 @@ const AssetPage: React.FC = () => {
         useful_life_years: Number(editUsefulLifeYears),
         residual_value: Number(editResidualValue),
         status: editStatus,
-        notes: editNotes || undefined
+        notes: editNotes || undefined,
+        image: editImage || undefined,
+        remove_image: editRemoveImage || undefined
       });
 
       setMessage({ text: `Aset "${editName}" berhasil diperbarui.`, isError: false });
@@ -450,9 +516,6 @@ const AssetPage: React.FC = () => {
               Buku Inventaris
             </span>
           </div>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Pusat kendali inventaris, valuasi fiskal, status operasional, dan depresiasi aset tetap & lancar.
-          </p>
         </div>
         {hasPermission('manage-assets') && (
           <button
@@ -629,16 +692,32 @@ const AssetPage: React.FC = () => {
               <div className="md:hidden space-y-3 p-4">
                 {assets.map((asset) => (
                   <div key={asset.id} className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#151D2A] shadow-2xs space-y-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2]">
-                          {asset.name}
-                        </h4>
-                        <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
-                          {asset.asset_code}
-                        </span>
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        {asset.image_url ? (
+                          <img
+                            src={asset.image_url}
+                            alt={asset.name}
+                            className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E1D6] object-cover dark:border-slate-700"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
+                            <Package size={18} className="opacity-70" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2] truncate">
+                            {asset.name}
+                          </h4>
+                          <span className="mt-1 inline-block font-mono text-[10px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-2 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
+                            {asset.asset_code}
+                          </span>
+                        </div>
                       </div>
-                      <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${statusStyleMap[asset.status] || statusStyleMap.tersedia}`}>
+                      <span className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold tracking-wide uppercase ${statusStyleMap[asset.status] || statusStyleMap.tersedia}`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-current opacity-80" />
                         <span>{statusLabelMap[asset.status] || asset.status}</span>
                       </span>
@@ -731,20 +810,38 @@ const AssetPage: React.FC = () => {
                       className="transition-colors hover:bg-[#FAF7F2]/80 dark:hover:bg-slate-800/40"
                     >
                       <td className="px-4 py-3.5">
-                        <div className="font-semibold text-slate-900 dark:text-slate-100 leading-snug">
-                          {asset.name}
-                        </div>
-                        <div className="mt-1 flex items-center gap-2">
-                          <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-1.5 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
-                            {asset.asset_code}
-                          </span>
-                          <Link
-                            to={`/assets/${asset.id}`}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1E3A5F] hover:underline dark:text-[#F4B752] transition-colors"
-                          >
-                            <Eye size={12} />
-                            Detail
-                          </Link>
+                        <div className="flex items-center gap-3">
+                          {asset.image_url ? (
+                            <img
+                              src={asset.image_url}
+                              alt={asset.name}
+                              className="h-10 w-10 shrink-0 rounded-lg border border-[#E6E1D6] object-cover dark:border-slate-700"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
+                              <Package size={18} className="opacity-70" />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <div className="font-semibold text-slate-900 dark:text-slate-100 leading-snug">
+                              {asset.name}
+                            </div>
+                            <div className="mt-1 flex items-center gap-2">
+                              <span className="font-mono text-[11px] text-slate-600 dark:text-slate-400 bg-[#FAF7F2] dark:bg-[#111822] px-1.5 py-0.5 rounded border border-[#E6E1D6] dark:border-slate-800">
+                                {asset.asset_code}
+                              </span>
+                              <Link
+                                to={`/assets/${asset.id}`}
+                                className="inline-flex items-center gap-1 text-[11px] font-medium text-[#1E3A5F] hover:underline dark:text-[#F4B752] transition-colors"
+                              >
+                                <Eye size={12} />
+                                Detail
+                              </Link>
+                            </div>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-3.5">
@@ -1074,6 +1171,52 @@ const AssetPage: React.FC = () => {
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
           </div>
+
+          {/* Unggah Foto Aset */}
+          <div className="md:col-span-2 lg:col-span-3">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Foto Fisik Aset (Opsional)
+            </label>
+            <div className="flex flex-wrap items-center gap-4">
+              {imagePreview ? (
+                <div className="relative group h-20 w-20 rounded-xl border border-[#E6E1D6] dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-900 shadow-2xs">
+                  <img
+                    src={imagePreview}
+                    alt="Preview Aset"
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveImage}
+                    title="Hapus foto"
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity shadow-xs cursor-pointer"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <div className="h-20 w-20 rounded-xl border border-dashed border-[#E6E1D6] dark:border-slate-700 bg-[#FAF7F2]/50 dark:bg-slate-900/50 flex flex-col items-center justify-center text-slate-400">
+                  <ImageIcon size={22} className="opacity-60 mb-1" />
+                  <span className="text-[9px] uppercase tracking-wider font-medium">Foto Aset</span>
+                </div>
+              )}
+              <div className="flex-1 min-w-[200px]">
+                <label className="inline-flex min-h-[38px] cursor-pointer items-center gap-2 rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors">
+                  <Upload size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                  <span>{imagePreview ? 'Ganti Foto' : 'Pilih Foto Aset'}</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
+                    onChange={handleImageChange}
+                    className="sr-only"
+                  />
+                </label>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Format didukung: JPG, PNG, WEBP (Maksimal 5 MB). Ditampilkan pada verifikasi QR, kartu fisik & katalog.
+                </p>
+              </div>
+            </div>
+          </div>
           <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button
               type="button"
@@ -1285,6 +1428,52 @@ const AssetPage: React.FC = () => {
               placeholder="Catatan kondisi, serial number, atau riwayat..."
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+          </div>
+
+          {/* Unggah / Ganti Foto Aset */}
+          <div className="md:col-span-2 lg:col-span-3">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Foto Fisik Aset
+            </label>
+            <div className="flex flex-wrap items-center gap-4">
+              {editImagePreview ? (
+                <div className="relative group h-20 w-20 rounded-xl border border-[#E6E1D6] dark:border-slate-700 overflow-hidden bg-slate-50 dark:bg-slate-900 shadow-2xs">
+                  <img
+                    src={editImagePreview}
+                    alt="Preview Aset"
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleRemoveEditImage}
+                    title="Hapus foto"
+                    className="absolute top-1 right-1 h-5 w-5 rounded-full bg-rose-600 text-white flex items-center justify-center opacity-90 hover:opacity-100 transition-opacity shadow-xs cursor-pointer"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ) : (
+                <div className="h-20 w-20 rounded-xl border border-dashed border-[#E6E1D6] dark:border-slate-700 bg-[#FAF7F2]/50 dark:bg-slate-900/50 flex flex-col items-center justify-center text-slate-400">
+                  <ImageIcon size={22} className="opacity-60 mb-1" />
+                  <span className="text-[9px] uppercase tracking-wider font-medium">Foto Aset</span>
+                </div>
+              )}
+              <div className="flex-1 min-w-[200px]">
+                <label className="inline-flex min-h-[38px] cursor-pointer items-center gap-2 rounded-xl border border-[#E6E1D6] bg-white px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-2xs hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors">
+                  <Upload size={14} className="text-[#1E3A5F] dark:text-[#F4B752]" />
+                  <span>{editImagePreview ? 'Ganti Foto' : 'Pilih Foto Aset'}</span>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/jpg"
+                    onChange={handleEditImageChange}
+                    className="sr-only"
+                  />
+                </label>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Format didukung: JPG, PNG, WEBP (Maksimal 5 MB). Foto akan diperbarui di katalog, passport & QR verifikasi.
+                </p>
+              </div>
+            </div>
           </div>
           <div className="flex items-center justify-end gap-3 pt-3 md:col-span-2 lg:col-span-3 border-t border-[#E6E1D6] dark:border-slate-800">
             <button

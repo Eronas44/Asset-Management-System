@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { 
   Camera, X, AlertCircle, CheckCircle2, 
-  ExternalLink, ArrowRight, RefreshCw, UploadCloud, Monitor,
-  ScanLine
+  ExternalLink, ArrowRight, RefreshCw, Monitor,
+  ScanLine, Package
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { assetService } from '../../services/asset.service';
@@ -153,29 +153,12 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
         const errMsg = err instanceof Error ? err.message : String(err);
         setCameraError(
           errMsg.includes('NotAllowedError') || errMsg.includes('Permission')
-            ? 'Izin akses kamera ditolak oleh browser. Silakan aktifkan izin kamera atau gunakan unggah foto barcode.'
+            ? 'Izin akses kamera ditolak oleh browser. Silakan aktifkan izin kamera pada browser.'
             : 'Tidak dapat mendeteksi atau mengakses perangkat kamera pada sistem ini.'
         );
         setIsScanning(false);
       }
     }, 150);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    try {
-      await stopScanner();
-      if (!scannerRef.current) {
-        scannerRef.current = new Html5Qrcode(containerId);
-      }
-      const decodedText = await scannerRef.current.scanFile(file, true);
-      handleScanSuccess(decodedText);
-    } catch (err) {
-      console.error(err);
-      setSearchError('Tidak ditemukan barcode atau QR code yang valid pada gambar yang diunggah.');
-    }
   };
 
   useEffect(() => {
@@ -285,18 +268,36 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
                     </div>
                   )}
 
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <span className="font-mono text-[10px] uppercase font-bold text-[#1E3A5F] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#E6E1D6] dark:bg-[#1A2433] dark:border-slate-700 dark:text-[#F4B752]">
-                        {detectedAsset.asset_code}
-                      </span>
-                      <h4 className="text-xs font-bold text-[#2B4C6F] dark:text-[#FAF7F2] mt-1.5">
-                        {detectedAsset.name}
-                      </h4>
+                  <div className="flex items-start gap-3.5 mb-2">
+                    {detectedAsset.image_url ? (
+                      <img
+                        src={detectedAsset.image_url}
+                        alt={detectedAsset.name}
+                        className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 rounded-xl border border-[#E6E1D6] object-cover shadow-2xs dark:border-slate-700"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-xl border border-[#E6E1D6] bg-[#FAF7F2] text-[#1E3A5F] dark:border-slate-700 dark:bg-[#1A2433] dark:text-[#F4B752]">
+                        <Package size={26} className="opacity-60" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <span className="font-mono text-[10px] uppercase font-bold text-[#1E3A5F] bg-[#FAF7F2] px-2 py-0.5 rounded-md border border-[#E6E1D6] dark:bg-[#1A2433] dark:border-slate-700 dark:text-[#F4B752]">
+                            {detectedAsset.asset_code}
+                          </span>
+                          <h4 className="text-xs sm:text-sm font-bold text-[#2B4C6F] dark:text-[#FAF7F2] mt-1.5 leading-snug">
+                            {detectedAsset.name}
+                          </h4>
+                        </div>
+                        <span className="rounded-full border border-[#E6E1D6] bg-[#FAF7F2] px-2.5 py-0.5 text-[10px] font-medium uppercase text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 shrink-0">
+                          {detectedAsset.status}
+                        </span>
+                      </div>
                     </div>
-                    <span className="rounded-full border border-[#E6E1D6] bg-[#FAF7F2] px-2.5 py-0.5 text-[10px] font-medium uppercase text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                      {detectedAsset.status}
-                    </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-[11px] text-slate-500 dark:text-slate-400 my-2 pt-2 border-t border-[#E6E1D6] dark:border-slate-800">
@@ -429,20 +430,6 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
               )}
             </div>
           )}
-
-          {/* Opsi Fallback: Unggah Gambar QR */}
-          <div className="pt-2 border-t border-[#E6E1D6] dark:border-slate-800">
-            <label className="flex items-center justify-center gap-2 w-full p-3 rounded-xl border border-dashed border-[#E6E1D6] hover:border-[#1E3A5F] bg-[#FAF7F2]/60 hover:bg-[#FAF7F2] dark:border-slate-700 dark:bg-slate-800/50 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer transition-colors">
-              <UploadCloud size={16} className="text-[#1E3A5F] dark:text-[#F4B752]" />
-              <span>Pindai dari File Gambar Barcode / Foto Galeri</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
-          </div>
 
         </div>
 

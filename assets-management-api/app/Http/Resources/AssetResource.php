@@ -33,6 +33,8 @@ class AssetResource extends JsonResource
         'current_book_value' => round($this->current_book_value, 2),
         'status' => $this->status,
         'notes' => $this->notes,
+        'image' => $this->image,
+        'image_url' => $this->image_url,
         'category' => new AssetCategoryResource($this->whenLoaded('category')),
         'location' => new AssetLocationResource($this->whenLoaded('location')),
         'created_at' => $this->created_at->format('Y-m-d H:i:s'),

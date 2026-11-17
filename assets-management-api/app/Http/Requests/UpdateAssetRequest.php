@@ -52,6 +52,8 @@ class UpdateAssetRequest extends FormRequest
             ],
             'status' => ['required', 'string', Rule::in(Asset::statusesForType($type))],
             'notes' => ['nullable', 'string'],
+            'image' => ['nullable'],
+            'remove_image' => ['nullable', 'boolean'],
         ];
     }
 }

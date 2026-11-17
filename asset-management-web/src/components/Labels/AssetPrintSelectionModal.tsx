@@ -436,8 +436,22 @@ export const AssetPrintSelectionModal: React.FC<AssetPrintSelectionModalProps> =
                       type="checkbox"
                       checked={isChecked}
                       onChange={() => {}} // dikendalikan oleh onClick div container
-                      className="h-4 w-4 rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer"
+                      className="h-4 w-4 rounded border-slate-300 text-[#1E3A5F] focus:ring-[#1E3A5F] cursor-pointer shrink-0"
                     />
+                    {asset.image_url ? (
+                      <img
+                        src={asset.image_url}
+                        alt={asset.name}
+                        className="h-9 w-9 shrink-0 rounded-lg border border-[#E6E1D6] object-cover dark:border-slate-700"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E6E1D6] bg-white text-[#1E3A5F] dark:border-slate-700 dark:bg-[#111822] dark:text-[#F4B752]">
+                        <Package size={16} className="opacity-70" />
+                      </div>
+                    )}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-xs text-slate-900 dark:text-slate-100 truncate group-hover:text-[#1E3A5F] dark:group-hover:text-[#F4B752] transition-colors">

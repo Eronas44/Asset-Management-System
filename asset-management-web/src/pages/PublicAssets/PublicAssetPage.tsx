@@ -157,6 +157,30 @@ const PublicAssetPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Foto Fisik Aset Terverifikasi */}
+            {asset.image_url && (
+              <div className="border-b border-slate-100 dark:border-slate-800 bg-[#FAF7F2]/40 dark:bg-[#111822]/40 p-6 flex flex-col sm:flex-row items-center gap-6">
+                <div className="relative group overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-2xs max-w-xs w-full sm:w-56 h-48 sm:h-44 flex items-center justify-center shrink-0">
+                  <img
+                    src={asset.image_url}
+                    alt={asset.name}
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                <div className="text-left space-y-1.5 flex-1">
+                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-[#1E3A5F] dark:text-[#F4B752] bg-white dark:bg-slate-800 px-2.5 py-0.5 rounded-md border border-slate-200 dark:border-slate-700">
+                    Dokumentasi Fisik Terverifikasi
+                  </span>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                    Foto Kondisi Aset Terdaftar
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Dokumentasi visual fisik resmi yang tersimpan di basis data terpusat sistem inventaris korporat untuk verifikasi keabsahan unit di lapangan.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Core Verification Data Grid */}
             <div className="grid gap-6 p-6 sm:grid-cols-2">
               <div className="space-y-4">

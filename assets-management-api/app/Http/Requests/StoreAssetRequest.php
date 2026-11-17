@@ -49,6 +49,7 @@ class StoreAssetRequest extends FormRequest
             // Status dibatasi ketat per tipe aset, dengan alias kompatibilitas untuk data lama
             'status' => ['required', 'string', Rule::in(Asset::statusesForType($type))],
             'notes' => ['nullable', 'string'],
+            'image' => ['nullable'],
         ];
     }
 }

@@ -232,6 +232,22 @@ const AssetDetailPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Asset Physical Photo */}
+            {asset.image_url && (
+              <div className="border-b border-[#E6E1D6] dark:border-slate-800 bg-[#FAF7F2]/40 dark:bg-[#111822]/40 p-4">
+                <div className="relative group overflow-hidden rounded-xl border border-[#E6E1D6] dark:border-slate-700 bg-white dark:bg-[#111822] shadow-2xs flex items-center justify-center">
+                  <img
+                    src={asset.image_url}
+                    alt={asset.name}
+                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
             {/* QR Core */}
             <div className="p-6 flex flex-col items-center text-center">
               <div className="p-3.5 rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2] dark:border-slate-700 dark:bg-[#111822]">

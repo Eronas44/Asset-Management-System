@@ -62,8 +62,11 @@ class AssetController extends Controller
      */
     public function store(StoreAssetRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+        $validated['image'] = $this->processImageInput($request);
+
         // Menyimpan data hasil validasi Form Request
-        $asset = Asset::create($request->validated());
+        $asset = Asset::create($validated);
         ActivityLogger::log('create_asset', "Mendaftarkan aset inventaris baru: {$asset->name}", $asset, ['asset_code' => $asset->asset_code]);
 
         // Memuat instans relasi sebelum dikembalikan ke resource respons
@@ -76,8 +79,8 @@ class AssetController extends Controller
             'message' => 'Success',
             'data' => new AssetResource($asset)
         ], 201);
-
     }
+
     /**
      * Menampilkan detail informasi dasar aset untuk akses publik (Scan QR Code).
      * 
@@ -98,8 +101,11 @@ class AssetController extends Controller
             'category' => $asset->category ? $asset->category->name : '-',
             'location' => $asset->location ? $asset->location->name : '-',
             'status' => $asset->status,
+            'image' => $asset->image,
+            'image_url' => $asset->image_url,
         ], 200);
     }
+
     /**
      * Menampilkan detail lengkap satu aset beserta riwayat transaksi dan log aktivitas.
      * 
@@ -128,8 +134,13 @@ class AssetController extends Controller
     public function update(UpdateAssetRequest $request, int $id): JsonResponse
     {
         $asset = Asset::findOrFail($id);
+        $validated = $request->validated();
 
-        $asset->update($request->validated());
+        if ($request->has('image') || $request->hasFile('image') || $request->has('remove_image')) {
+            $validated['image'] = $this->processImageInput($request, $asset->image);
+        }
+
+        $asset->update($validated);
 
         ActivityLogger::log(
             'update_asset',
@@ -145,6 +156,60 @@ class AssetController extends Controller
             'message' => 'Aset berhasil diperbarui',
             'data' => new AssetResource($asset)
         ], 200);
+    }
+
+    /**
+     * Helper pemrosesan berkas gambar (Upload file multipart atau Base64 Data URI).
+     */
+    private function processImageInput(Request $request, ?string $existingImage = null): ?string
+    {
+        // 1. Instruksi hapus gambar yang sudah ada
+        if ($request->boolean('remove_image')) {
+            if ($existingImage && !str_starts_with($existingImage, 'http') && \Illuminate\Support\Facades\Storage::disk('public')->exists($existingImage)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($existingImage);
+            }
+            return null;
+        }
+
+        // 2. Berkas diupload via form multipart
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension() ?: 'jpg';
+            $filename = \Illuminate\Support\Str::uuid() . '.' . $extension;
+            $file->storeAs('assets', $filename, 'public');
+
+            if ($existingImage && !str_starts_with($existingImage, 'http') && \Illuminate\Support\Facades\Storage::disk('public')->exists($existingImage)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($existingImage);
+            }
+            return 'assets/' . $filename;
+        }
+
+        // 3. Dikirim via string Base64 Data URI
+        $imageInput = $request->input('image');
+        if (!empty($imageInput) && is_string($imageInput) && str_starts_with($imageInput, 'data:image')) {
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageInput, $type)) {
+                $data = substr($imageInput, strpos($imageInput, ',') + 1);
+                $decoded = base64_decode($data);
+                if ($decoded !== false) {
+                    $ext = strtolower($type[1]);
+                    if ($ext === 'jpeg') $ext = 'jpg';
+                    $filename = \Illuminate\Support\Str::uuid() . '.' . $ext;
+                    \Illuminate\Support\Facades\Storage::disk('public')->put('assets/' . $filename, $decoded);
+
+                    if ($existingImage && !str_starts_with($existingImage, 'http') && \Illuminate\Support\Facades\Storage::disk('public')->exists($existingImage)) {
+                        \Illuminate\Support\Facades\Storage::disk('public')->delete($existingImage);
+                    }
+                    return 'assets/' . $filename;
+                }
+            }
+        }
+
+        // 4. Jika string URL eksternal atau tetap
+        if ($request->has('image')) {
+            return $request->input('image');
+        }
+
+        return $existingImage;
     }
 
     /**

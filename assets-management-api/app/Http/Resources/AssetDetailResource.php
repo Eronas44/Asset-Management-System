@@ -25,6 +25,8 @@ class AssetDetailResource extends JsonResource
             'purchase_price' => (float) $this->purchase_price,
             'status' => $this->status,
             'notes' => $this->notes,
+            'image' => $this->image,
+            'image_url' => $this->image_url,
             
             // Informasi Data Master Terkait
             'category' => new AssetCategoryResource($this->whenLoaded('category')),

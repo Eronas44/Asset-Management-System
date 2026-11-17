@@ -6,6 +6,8 @@ export interface PublicAssetData {
   category: string;
   location: string;
   status: string;
+  image?: string | null;
+  image_url?: string | null;
 }
 
 export const publicAssetService = {
