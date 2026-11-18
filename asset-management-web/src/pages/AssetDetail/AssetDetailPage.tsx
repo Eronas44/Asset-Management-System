@@ -12,7 +12,9 @@ import {
   Tag,
   Wallet,
   ShieldCheck,
-  User
+  User,
+  Calculator,
+  Info
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import { assetService } from '../../services/asset.service';
@@ -482,6 +484,51 @@ const AssetDetailPage: React.FC = () => {
                 <div className="rounded-2xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] shadow-xs">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Beban Depresiasi / Tahun</p>
                   <p className="mt-1 font-mono text-lg font-bold text-slate-800 dark:text-slate-200">{formatRupiah(asset.annual_depreciation)}</p>
+                </div>
+              </div>
+
+              {/* Formula & Calculation Breakdown Card */}
+              <div className="rounded-2xl border border-[#E6E1D6] bg-[#FAF7F2]/60 p-5 dark:border-slate-800 dark:bg-[#151D2A] space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#1E3A5F] dark:text-[#F4B752]">
+                  <Calculator size={15} />
+                  <span>Transparansi Rumus & Perhitungan Fiskal (Metode Garis Lurus)</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* Rumus Depresiasi Tahunan */}
+                  <div className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] space-y-2">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                      1. Rumus Beban Depresiasi per Tahun
+                    </span>
+                    <div className="rounded-lg bg-slate-50 dark:bg-slate-900/80 p-2.5 font-mono text-[11px] text-[#1E3A5F] dark:text-[#F4B752] border border-slate-200 dark:border-slate-800">
+                      Depresiasi/Thn = (Biaya Perolehan - Nilai Residu) ÷ Masa Manfaat
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      = ({formatRupiah(asset.purchase_price)} - {formatRupiah(asset.residual_value)}) ÷ {asset.useful_life_years} Tahun
+                      <br />
+                      = <strong className="text-slate-800 dark:text-slate-200">{formatRupiah(asset.annual_depreciation)} / tahun</strong> ({formatRupiah(Number(asset.annual_depreciation || 0) / 12)} / bulan).
+                    </p>
+                  </div>
+
+                  {/* Rumus Nilai Buku Fiskal Saat Ini */}
+                  <div className="rounded-xl border border-[#E6E1D6] bg-white p-4 dark:border-slate-800 dark:bg-[#1A2433] space-y-2">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200 block">
+                      2. Rumus Nilai Buku Fiskal Saat Ini
+                    </span>
+                    <div className="rounded-lg bg-slate-50 dark:bg-slate-900/80 p-2.5 font-mono text-[11px] text-[#1E3A5F] dark:text-[#F4B752] border border-slate-200 dark:border-slate-800">
+                      Nilai Buku = Biaya Perolehan - (Depresiasi/Bulan × Bulan Terpakai)
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      Usia aset saat ini: <strong className="text-slate-800 dark:text-slate-200">{lifecycleMeta.ageYears} tahun</strong>. Nilai buku akan terkunci otomatis dan tidak akan pernah menyusut di bawah Nilai Residu ({formatRupiah(asset.residual_value)}).
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                  <Info size={14} className="mt-0.5 shrink-0 text-[#1E3A5F] dark:text-[#F4B752]" />
+                  <span>
+                    <strong>Catatan Kebijakan:</strong> Depresiasi dihitung otomatis secara proporsional per bulan berdasarkan tanggal perolehan ({formatDate(asset.purchase_date)}). Setelah umur manfaat {asset.useful_life_years} tahun tercapai, nilai buku akan tetap setara Nilai Residu.
+                  </span>
                 </div>
               </div>
             </div>

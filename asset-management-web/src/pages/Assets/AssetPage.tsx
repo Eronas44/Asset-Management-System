@@ -15,7 +15,7 @@ import {
   Package, Plus, CheckCircle2, AlertCircle, Search, Filter, 
   FileText, FileSpreadsheet, ChevronLeft, ChevronRight, 
   ExternalLink, Eye, Info, Pencil, Trash2, Printer,
-  Image as ImageIcon, Upload, X
+  Image as ImageIcon, Upload, X, Calculator
 } from 'lucide-react';
 import { useDebounce } from '../../utils/useDebounce';
 import { useToast } from '../../components/Feedback/ToastContext';
@@ -733,12 +733,14 @@ const AssetPage: React.FC = () => {
                         <span className="font-medium text-slate-700 dark:text-slate-300">{asset.location?.name || '-'}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-400">Harga Perolehan:</span>
+                        <span className="block text-[10px] text-slate-400">Biaya Perolehan:</span>
                         <span className="font-mono font-medium text-slate-800 dark:text-slate-200">{formatRupiah(asset.purchase_price)}</span>
+                        <span className="block text-[9px] text-slate-400">Residu: {formatRupiah(asset.residual_value)}</span>
                       </div>
                       <div>
-                        <span className="block text-[10px] text-slate-400">Nilai Buku:</span>
-                        <span className="font-mono font-medium text-slate-800 dark:text-slate-200">{asset.current_book_value !== undefined ? formatRupiah(asset.current_book_value) : '-'}</span>
+                        <span className="block text-[10px] text-slate-400">Nilai Buku (Kini):</span>
+                        <span className="font-mono font-medium text-emerald-700 dark:text-emerald-400">{asset.current_book_value !== undefined ? formatRupiah(asset.current_book_value) : '-'}</span>
+                        <span className="block text-[9px] text-slate-400">Susut: {asset.annual_depreciation ? `${formatRupiah(asset.annual_depreciation)}/thn` : '-'}</span>
                       </div>
                     </div>
 
@@ -796,9 +798,45 @@ const AssetPage: React.FC = () => {
                     <th className="whitespace-nowrap px-4 py-3">Identifikasi Aset</th>
                     <th className="px-4 py-3">Kategori & Penempatan</th>
                     <th className="whitespace-nowrap px-4 py-3">Status</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-right">Biaya Perolehan</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-right">Nilai Buku</th>
-                    <th className="whitespace-nowrap px-4 py-3 text-right">Depresiasi/Thn</th>
+                    <th className="whitespace-nowrap px-4 py-3 text-right">
+                      <div className="inline-flex flex-col items-end">
+                        <span className="inline-flex items-center gap-1">
+                          Biaya Perolehan
+                          <span title="Total harga beli awal aset saat pengadaan">
+                            <Info size={11} className="text-slate-400 cursor-help" />
+                          </span>
+                        </span>
+                        <span className="text-[9px] font-normal lowercase tracking-normal text-slate-500 dark:text-slate-400">
+                          (harga beli)
+                        </span>
+                      </div>
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-3 text-right">
+                      <div className="inline-flex flex-col items-end">
+                        <span className="inline-flex items-center gap-1">
+                          Nilai Buku
+                          <span title="Nilai bersih aset saat ini = Biaya Perolehan - (Depresiasi/Bln × Bulan Berjalan). Batas minimal: Nilai Residu.">
+                            <Info size={11} className="text-slate-400 cursor-help" />
+                          </span>
+                        </span>
+                        <span className="text-[9px] font-normal lowercase tracking-normal text-slate-500 dark:text-slate-400">
+                          (nilai bersih kini)
+                        </span>
+                      </div>
+                    </th>
+                    <th className="whitespace-nowrap px-4 py-3 text-right">
+                      <div className="inline-flex flex-col items-end">
+                        <span className="inline-flex items-center gap-1">
+                          Depresiasi/Thn
+                          <span title="Rumus Garis Lurus: (Biaya Perolehan - Nilai Residu) ÷ Masa Manfaat">
+                            <Info size={11} className="text-slate-400 cursor-help" />
+                          </span>
+                        </span>
+                        <span className="text-[9px] font-normal lowercase tracking-normal text-slate-500 dark:text-slate-400">
+                          (penyusutan/thn)
+                        </span>
+                      </div>
+                    </th>
                     <th className="whitespace-nowrap px-4 py-3 text-center">QR Verifikasi</th>
                     <th className="whitespace-nowrap px-4 py-3 text-right">Aksi</th>
                   </tr>
@@ -867,13 +905,22 @@ const AssetPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right font-mono text-xs tabular-nums font-semibold text-slate-900 dark:text-slate-100">
-                        {formatRupiah(asset.purchase_price)}
+                        <div>{formatRupiah(asset.purchase_price)}</div>
+                        <div className="text-[10px] font-normal text-slate-400 font-sans" title="Estimasi Nilai Residu">
+                          residu: {formatRupiah(asset.residual_value)}
+                        </div>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3.5 text-right font-mono text-xs tabular-nums font-semibold text-emerald-700 dark:text-emerald-400">
-                        {asset.current_book_value !== undefined ? formatRupiah(asset.current_book_value) : '-'}
+                        <div>{asset.current_book_value !== undefined ? formatRupiah(asset.current_book_value) : '-'}</div>
+                        <div className="text-[10px] font-normal text-slate-400 font-sans" title="Nilai bersih real-time setelah penyusutan">
+                          real-time fiskal
+                        </div>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3.5 text-right font-mono text-xs tabular-nums text-slate-500 dark:text-slate-400">
-                        {asset.annual_depreciation !== undefined ? formatRupiah(asset.annual_depreciation) : '-'}
+                      <td className="whitespace-nowrap px-4 py-3.5 text-right font-mono text-xs tabular-nums text-slate-700 dark:text-slate-300">
+                        <div>{asset.annual_depreciation !== undefined ? formatRupiah(asset.annual_depreciation) : '-'}</div>
+                        <div className="text-[10px] font-normal text-slate-400 font-sans" title="Beban susut per tahun">
+                          {asset.useful_life_years ? `${asset.useful_life_years} thn masa pakai` : '-'}
+                        </div>
                       </td>
                       <td className="px-4 py-3.5 text-center">
                         {asset.qr_code_url ? (
@@ -1100,8 +1147,13 @@ const AssetPage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              Biaya Perolehan (IDR) <span className="text-rose-600 dark:text-rose-400">*</span>
+            <label className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <span>Biaya Perolehan (IDR) <span className="text-rose-600 dark:text-rose-400">*</span></span>
+              {purchasePrice > 0 && (
+                <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 lowercase font-medium">
+                  {formatRupiah(purchasePrice)}
+                </span>
+              )}
             </label>
             <input
               type="number"
@@ -1112,6 +1164,9 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Total biaya beli/pengadaan awal aset hingga siap digunakan (faktur + ongkir).
+            </p>
           </div>
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -1126,10 +1181,18 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Estimasi usia ekonomis aset layak pakai (misal: Komputer 4-5 thn, Mesin 8 thn).
+            </p>
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              Nilai Residu (IDR) <span className="text-rose-600 dark:text-rose-400">*</span>
+            <label className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <span>Nilai Residu (IDR) <span className="text-rose-600 dark:text-rose-400">*</span></span>
+              {residualValue > 0 && (
+                <span className="font-mono text-[10px] text-slate-600 dark:text-slate-300 lowercase font-medium">
+                  {formatRupiah(residualValue)}
+                </span>
+              )}
             </label>
             <input
               type="number"
@@ -1141,6 +1204,40 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Taksiran harga jual sisa setelah masa pakai habis (isi 0 jika dibuang/afkir).
+            </p>
+          </div>
+
+          {/* Kotak Panduan & Simulasi Kalkulasi Depresiasi */}
+          <div className="md:col-span-2 lg:col-span-3 rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/80 p-3.5 text-xs dark:border-slate-800 dark:bg-[#111822]">
+            <div className="flex items-center gap-2 font-semibold text-[#1E3A5F] dark:text-[#F4B752] mb-2">
+              <Calculator size={15} />
+              <span>Simulasi Perhitungan Depresiasi Otomatis (Metode Garis Lurus / Straight-Line)</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">1. Nilai yang Disusutkan:</span>
+                <span className="font-mono font-bold text-[#1E3A5F] dark:text-[#FAF7F2] text-xs">
+                  {formatRupiah(Math.max(0, purchasePrice - residualValue))}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Biaya Perolehan - Nilai Residu</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">2. Beban Depresiasi / Tahun:</span>
+                <span className="font-mono font-bold text-amber-700 dark:text-amber-400 text-xs">
+                  {usefulLifeYears > 0 ? formatRupiah(Math.max(0, (purchasePrice - residualValue) / usefulLifeYears)) : 'Rp 0'}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Nilai Susut ÷ {usefulLifeYears || 1} Tahun</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">3. Beban Depresiasi / Bulan:</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs">
+                  {usefulLifeYears > 0 ? formatRupiah(Math.max(0, (purchasePrice - residualValue) / usefulLifeYears / 12)) : 'Rp 0'}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Depresiasi Tahunan ÷ 12 Bulan</span>
+              </div>
+            </div>
           </div>
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -1361,8 +1458,13 @@ const AssetPage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              Harga Pembelian (IDR) <span className="text-rose-600 dark:text-rose-400">*</span>
+            <label className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <span>Biaya Perolehan (IDR) <span className="text-rose-600 dark:text-rose-400">*</span></span>
+              {editPurchasePrice > 0 && (
+                <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400 lowercase font-medium">
+                  {formatRupiah(editPurchasePrice)}
+                </span>
+              )}
             </label>
             <input
               type="number"
@@ -1372,6 +1474,9 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Total biaya beli/pengadaan awal aset hingga siap digunakan (faktur + ongkir).
+            </p>
           </div>
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
@@ -1385,10 +1490,18 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Estimasi usia ekonomis aset layak pakai (misal: Komputer 4-5 thn, Mesin 8 thn).
+            </p>
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-              Nilai Residu (IDR) <span className="text-rose-600 dark:text-rose-400">*</span>
+            <label className="mb-1.5 flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              <span>Nilai Residu (IDR) <span className="text-rose-600 dark:text-rose-400">*</span></span>
+              {editResidualValue > 0 && (
+                <span className="font-mono text-[10px] text-slate-600 dark:text-slate-300 lowercase font-medium">
+                  {formatRupiah(editResidualValue)}
+                </span>
+              )}
             </label>
             <input
               type="number"
@@ -1399,6 +1512,40 @@ const AssetPage: React.FC = () => {
               required
               className="w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 font-mono text-xs text-slate-900 outline-none transition-all focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-sky-400"
             />
+            <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              Taksiran harga jual sisa setelah masa pakai habis (isi 0 jika dibuang/afkir).
+            </p>
+          </div>
+
+          {/* Kotak Panduan & Simulasi Kalkulasi Depresiasi */}
+          <div className="md:col-span-2 lg:col-span-3 rounded-xl border border-[#E6E1D6] bg-[#FAF7F2]/80 p-3.5 text-xs dark:border-slate-800 dark:bg-[#111822]">
+            <div className="flex items-center gap-2 font-semibold text-[#1E3A5F] dark:text-[#F4B752] mb-2">
+              <Calculator size={15} />
+              <span>Simulasi Perhitungan Depresiasi Otomatis (Metode Garis Lurus / Straight-Line)</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px]">
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">1. Nilai yang Disusutkan:</span>
+                <span className="font-mono font-bold text-[#1E3A5F] dark:text-[#FAF7F2] text-xs">
+                  {formatRupiah(Math.max(0, editPurchasePrice - editResidualValue))}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Biaya Perolehan - Nilai Residu</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">2. Beban Depresiasi / Tahun:</span>
+                <span className="font-mono font-bold text-amber-700 dark:text-amber-400 text-xs">
+                  {editUsefulLifeYears > 0 ? formatRupiah(Math.max(0, (editPurchasePrice - editResidualValue) / editUsefulLifeYears)) : 'Rp 0'}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Nilai Susut ÷ {editUsefulLifeYears || 1} Tahun</span>
+              </div>
+              <div className="bg-white dark:bg-slate-900/60 p-2.5 rounded-lg border border-[#E6E1D6] dark:border-slate-800">
+                <span className="block text-slate-500 dark:text-slate-400 font-medium">3. Beban Depresiasi / Bulan:</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-xs">
+                  {editUsefulLifeYears > 0 ? formatRupiah(Math.max(0, (editPurchasePrice - editResidualValue) / editUsefulLifeYears / 12)) : 'Rp 0'}
+                </span>
+                <span className="block text-[10px] text-slate-400 mt-0.5">Rumus: Depresiasi Tahunan ÷ 12 Bulan</span>
+              </div>
+            </div>
           </div>
           <div>
             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
